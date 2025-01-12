@@ -1,22 +1,22 @@
-source("~/GitHub/DTR/datagen.R")
+source("~/GitHub/BayesRegDTR/datagen.R")
 library(gtools)
 compute_Zt <- function(A, At_max, X, t) {
     st <- function(A, key, t) {
-        return(apply(A[,1:t] == rep(key[1:t], each = n), 1, all))
+        return(apply(A[,1:t-1] == rep(key, each = n), 1, all))
     }
     
-    Z_tilde <- X[,1:t]
+    Z_tilde <- X[,1:t-1]
     
-    
-    perms <- permutations(At_max, t, repeats.allowed = TRUE)
-    Z_list <- vector(mode = "list", length = nrow(perms))
+    perms <- permutations(At_max, t-1, repeats.allowed = TRUE)
+    Zt <- matrix(0, nrow = n, ncol = (t-1) * nrow(perms))
     for (i in 1:nrow(perms)) {
-        Z_list[[i]] <- st(A, perms[i,], t) * Z_tilde
+        colnum <- (i-1) * (t-1) + 1
+        Zt[, colnum:(colnum + t - 2)] <- st(A, perms[i,], t) * Z_tilde
     }
-    names(Z_list) <- apply(perms, 1, paste, collapse = "") # Name each element as the list of `a` values
-    # Each name is actually modified ternary. To calculate index, -1 from all 
-    # bits other than LSB, then convert from ternary to decimal
-    return(Z_list)
+    if ((ans <- ncol(Zt)) != (proper <- (t-1) * At_max^(t-1)))
+        stop("Zt does not have the right amount of columns: ", ans, " != ", proper)
+    
+    return(Zt)
 }
 
 # Summary Stats
@@ -41,11 +41,11 @@ compute_mt <- function(Zt, thetat_hat, sigmat) {
     solve(sigmat) %*% t(Zt) %*% Zt %*% thetat_hat
 }
 
-t <- 2
-tau <- 5
-Zt_list     <- compute_Zt(A, At_max, X, t)
-thetat_hat  <- lapply(X = Zt_list, FUN = compute_thetat_hat, Xt = X[,t])
-RSSt        <- mapply(compute_RSSt, Zt = Zt_list, thetat_hat = thetat_hat, MoreArgs = list(Xt = X[,t]), SIMPLIFY = FALSE)
-sigmat      <- lapply(Zt_list, compute_sigmat, tau = tau)
-ct          <- mapply(compute_ct, Zt = Zt_list, thetat_hat = thetat_hat, sigmat = sigmat, SIMPLIFY = FALSE)
-mt          <- mapply(compute_mt, Zt = Zt_list, thetat_hat = thetat_hat, sigmat = sigmat, SIMPLIFY = FALSE)
+t <- 3
+tau <- 10
+Zt          <- compute_Zt(A, At_max, X, t)
+thetat_hat  <- compute_thetat_hat(Zt, X[,t])
+RSSt        <- compute_RSSt(Zt, thetat_hat, X[,t])
+sigmat      <- compute_sigmat(Zt, tau)
+ct          <- compute_ct(Zt, thetat_hat, sigmat)
+mt          <- compute_mt(Zt, thetat_hat, sigmat)
