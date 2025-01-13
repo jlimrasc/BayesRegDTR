@@ -2,10 +2,10 @@ source("~/GitHub/BayesRegDTR/datagen.R")
 library(gtools)
 compute_Zt <- function(A, At_max, X, t) {
     st <- function(A, key, t) {
-        return(apply(A[,1:t-1] == rep(key, each = n), 1, all))
+        return(apply(A[,,1:t-1] == rep(key, each = n), 1, all))
     }
     
-    Z_tilde <- X[,1:t-1]
+    Z_tilde <- X[,,1:t-1]
     
     perms <- permutations(At_max, t-1, repeats.allowed = TRUE)
     Zt <- matrix(0, nrow = n, ncol = (t-1) * nrow(perms))
@@ -44,8 +44,8 @@ compute_mt <- function(Zt, thetat_hat, sigmat) {
 t <- 3
 tau <- 10
 Zt          <- compute_Zt(A, At_max, X, t)
-thetat_hat  <- compute_thetat_hat(Zt, X[,t])
-RSSt        <- compute_RSSt(Zt, thetat_hat, X[,t])
+thetat_hat  <- compute_thetat_hat(Zt, X[,,t])
+RSSt        <- compute_RSSt(Zt, thetat_hat, X[,,t])
 sigmat      <- compute_sigmat(Zt, tau)
 ct          <- compute_ct(Zt, thetat_hat, sigmat)
 mt          <- compute_mt(Zt, thetat_hat, sigmat)
