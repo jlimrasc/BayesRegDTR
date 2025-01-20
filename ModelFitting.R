@@ -1,6 +1,6 @@
 source("~/GitHub/BayesRegDTR/datagen.R")
 library(gtools)
-compute_Zt <- function(A, At_max, X, t, n) {
+compute_Zt <- function(A, At_len, X, t, n) {
     st <- function(A, key, t) {
         return(
             if(is.vector(tempRes <- A[,1:(t-1)] == rep(key, each = n)))
@@ -12,7 +12,7 @@ compute_Zt <- function(A, At_max, X, t, n) {
     Z_tilde <- matrix(X[,,1:(t-1)], nrow = n, ncol = (t-1) * p_t)
 
     # Calculate permutations of a1, ..., an
-    perms <- permutations(At_max, t-1, repeats.allowed = TRUE)
+    perms <- permutations(At_len, t-1, repeats.allowed = TRUE)
     
     # Preallocate Zt
     Zt <- matrix(0, nrow = n, ncol = (t-1) * p_t * nrow(perms))
@@ -24,7 +24,7 @@ compute_Zt <- function(A, At_max, X, t, n) {
     }
 
     # Check size
-    if ((ans <- ncol(Zt)) != (proper <- (t-1) * p_t * At_max^(t-1)))
+    if ((ans <- ncol(Zt)) != (proper <- (t-1) * p_t * At_len^(t-1)))
         stop("Zt does not have the right amount of columns: ", ans, " != ", proper)
     
     return(Zt)
@@ -53,8 +53,8 @@ compute_mt <- function(Zt, thetat_hat, omegat) {
 }
 
 t <- 3
-tau <- 10
-Zt          <- compute_Zt(A, At_max, X, t, n)
+tau <- 0.01
+Zt          <- compute_Zt(A, At_len, X, t, n)
 thetat_hat  <- compute_thetat_hat(Zt, X[,,t])
 RSSt        <- compute_RSSt(Zt, thetat_hat, X[,,t])
 omegat      <- compute_omegat(Zt, tau)
