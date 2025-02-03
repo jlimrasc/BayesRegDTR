@@ -43,9 +43,8 @@ compute_omegat <- function(Zt, tau) {
     t(Zt) %*% Zt + diag(tau, nrow = ncol(Zt))
 }
 
-compute_ct <- function(Zt, thetat_hat, omegat) {
-    drop(t(thetat_hat) %*% t(Zt) %*% Zt %*% solve(omegat) %*% t(Zt) %*% Zt %*% thetat_hat -
-        t(thetat_hat) %*% t(Zt) %*% Zt %*% thetat_hat)
+compute_ct <- function(Zt, Xt, omegat, n) {
+    drop(t(Xt) %*% (diag(n) - Zt %*% solve(omegat) %*% t(Zt)) %*% Xt)
 }
 
 compute_mt <- function(Zt, thetat_hat, omegat) {
@@ -58,5 +57,5 @@ Zt          <- compute_Zt(A, At_len, X, t, n)
 thetat_hat  <- compute_thetat_hat(Zt, X[,,t])
 RSSt        <- compute_RSSt(Zt, thetat_hat, X[,,t])
 omegat      <- compute_omegat(Zt, tau)
-ct          <- compute_ct(Zt, thetat_hat, omegat)
+ct          <- compute_ct(Zt, X[,,t], omegat, n)
 mt          <- compute_mt(Zt, thetat_hat, omegat)
