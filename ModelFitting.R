@@ -1,4 +1,3 @@
-source("~/GitHub/BayesRegDTR/datagen_univariate.R")
 library(gtools)
 compute_Zt <- function(A, At_len, X, t, n, p_list) {
     st <- function(A, key, t) {

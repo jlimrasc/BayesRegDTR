@@ -40,4 +40,6 @@ compute_MC_draws <- function(D, tau, At_mags, B, alph, bet) {
     return(list(thetat_b_list, sigmat_2b_list))
 }
 
+source("~/GitHub/BayesRegDTR/datagen_univariate.R")
+source("~/GitHub/BayesRegDTR/ModelFitting.R")
 res <- compute_MC_draws(D = 1, tau = 0.01, At_mags = 1, B = 10000, alph = 3, bet = 4)

@@ -1,5 +1,4 @@
-set.seed(1) #remove later
-gen_test_dataset <- function(n, T, p_list, At_len) {
+generate_dataset_mvt <- function(n, T, p_list, At_len) {
     library(mvtnorm)
     
     # Step 1
@@ -124,12 +123,14 @@ gen_test_dataset <- function(n, T, p_list, At_len) {
     return(c(list(yi), X, list(A)))
 }
 
+set.seed(1) #remove later
+
 # Starting Scalar values
 n       <- 5000
 T       <- 5
 p_list  <- rep(2, T)
 At_len  <- 3
 
-res <- gen_test_dataset(n, T, p_list, At_len)
+res <- generate_dataset_mvt(n, T, p_list, At_len)
 Data <- res[1:(T+1)]
 A <- res[[T+2]]

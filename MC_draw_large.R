@@ -39,4 +39,6 @@ compute_MC_draws <- function(D, tau, At_mags, B, nu0, V0) {
         return(list(sigmat_b_list, Wt_b_list))
 }
 
+source("~/GitHub/BayesRegDTR/datagen_multivariate.R")
+source("~/GitHub/BayesRegDTR/ModelFitting.R")
 res <- compute_MC_draws(D = Data, tau = 0.01, At_mags = 1, B = 10000, nu0 = 3, V0 = 4)
