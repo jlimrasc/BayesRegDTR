@@ -1,5 +1,6 @@
 library(mvtnorm)
 library(MixMatrix)
+tau <- 0.01
 B <- 10000
 nu0 <- 3
 V0 <- 4
@@ -13,20 +14,23 @@ draw_Wt_b <- function(Zt, omegat, Mnt, tau, sigmat_b) {
     # apply(rmatrixnorm(1, mean = Mnt, U = solve(omegat), sigmat_b))
 }
 
-# thetat_b_list <- matrix(0, nrow = B, ncol = (t-1) * p_t *At_len^(t-1))
+X <- Data[-1]
+
 sigmat_b_list   <- vector(mode = "list", length = T)
 Wt_b_list       <- vector(mode = "list", length = T)
 for (t in 2:T) {
-    Zt          <- compute_Zt(A, At_len, X, t, n)
+    # Compute summary stats
+    Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
     omegat      <- compute_omegat(Zt, tau)
 
-    Mnt <- solve(omegat) %*% t(Zt) %*% X[,,t]
+    Mnt <- solve(omegat) %*% t(Zt) %*% X[[t]]
     
-    sigmat_b <- draw_sigmat_b(Zt, X[,,t], Mnt, nu0, V0, tau, n)
+    # Draw
+    sigmat_b <- draw_sigmat_b(Zt, X[[t]], Mnt, nu0, V0, tau, n)
     browser()
     Wt_b <- draw_Wt_b(Zt, omegat, Mnt, tau, sigmat_b)
     
-
+    # Store
     sigmat_b_list[[t]]  <- sigmat_b
     Wt_b_list[[t]] <- Wt_b
 }
