@@ -35,10 +35,6 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                      split(A[,t-1] == 2, 1:n), 
                      split(A[,t-1] == 3, 1:n), 
                      C = C, t = t)))
-
-        # X[[t]] <- rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-        #     (A[,t-1] == 2) * (t * C %*% X[[t-1]]) + # If a==2
-        #     (A[,t-1] == 3) * (-t * C %*% X[[t-1]]) # Elif a==3
     }
     
     if (T > 2) {
@@ -56,8 +52,6 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                      split(A[,t-1] == 2, 1:n), 
                      split(A[,t-1] == 3, 1:n), 
                      C = C, C2 = C2, t = t)))
-            # A2 * (t * C %*% X[[t-1]] - (t-1) * C2 %*% X[[t-2]]) + # If a==2
-            # A3 * (-t * C %*% X[[t-1]] + sqrt(t-1) * C2 %*% X[[t-2]]) # Elif a==3
     }
     
     if (T > 3) {
@@ -80,15 +74,6 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                          split(A[,t-1] == 2, 1:n), 
                          split(A[,t-1] == 3, 1:n), 
                          C = C, C2 = C2, C3 = C3, t = t)))
-            # X[[t]] <- rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-            #     apply(X[[t]], X[[t-1]], X[[t-2]], MARGIN = 1, FUN = function(X_it1, X_it2, X_it3, t, A_t1, C, C2, C3) {
-            #     (A_t1 == 2) * (t * C %*% X_it1 - (t-1) * C2 %*% X_it2 + (t-2) * C3 %*% X_it3) + # If a==2
-            #     (A_t1 == 3) * (-t * C %*% X_it1 + sqrt(t-1) * C2 %*% X_it2 + sqrt(t-2) * C3 %*% X_it3) # Elif a==3
-            #         }, t = t, A_t1 = A[,t-1], C = C, C2 = C2, C3 = C3
-            #     )
-            # X[[t]] <- rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-            #     (A[,t-1] == 2) * (t * C %*% X[[t-1]] - (t-1) * C2 %*% X[[t-2]] + (t-2) * C3 %*% X[[t-3]]) + # If a==2
-            #     (A[,t-1] == 3) * (-t * C %*% X[[t-1]] + sqrt(t-1) * C2 %*% X[[t-2]] + sqrt(t-2) * C3 %*% X[[t-3]]) # Elif a==3
         }
     }
     
@@ -102,20 +87,22 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
     
     if (T > 0) {
         t <- 1
-        mi <- mi + (A[,t] == 2) * (sin(10*t) * t(X[[t]])) + (A[,t] == 3) * (cos(10*t) * t(X[[t]]))
+        # browser()
+        mi <- mi + (A[,t] == 2) * (sin(10*t) * X[[t]]) %*% rep(1, p_list[t]) + (A[,t] == 3) * (cos(10*t) * X[[t]] %*% rep(1, p_list[t]))
+        
     }
     
     if (T > 1) {
         t <- 2
-        mi <- mi + (A[,t] == 2) * (sin(10*t) * t(X[[t]]) - sin(10*t - 10) * t(X[[t-1]])) + 
-                   (A[,t] == 3) * (cos(10*t) * t(X[[t]]) - cos(10*t - 10) * t(X[[t-1]]))
+        mi <- mi + (A[,t] == 2) * (sin(10*t) * X[[t]] %*% rep(1, p_list[t]) - sin(10*t - 10) * X[[t-1]] %*% rep(1, p_list[t-1]))  + 
+                   (A[,t] == 3) * (cos(10*t) * X[[t]] %*% rep(1, p_list[t]) - cos(10*t - 10) * X[[t-1]] %*% rep(1, p_list[t-1]))
     }
     
     if (T > 2) {
         for (t in 3:T) {
             mi <- mi + 
-                (A[,t] == 2) * (sin(10*t) * t(X[[t]]) - sin(10*t - 10) * t(X[[t-1]]) + sin(10*t - 20) * t(X[[t-2]])) +
-                (A[,t] == 3) * (cos(10*t) * t(X[[t]]) - cos(10*t - 10) * t(X[[t-1]]) + sqrt(abs(cos(10*t - 20))) * t(X[[t-2]]))
+                (A[,t] == 2) * (sin(10*t) * X[[t]] %*% rep(1, p_list[t]) - sin(10*t - 10) * X[[t-1]] %*% rep(1, p_list[t-1]) + sin(10*t - 20) * X[[t-2]] %*% rep(1, p_list[t-2]) )+
+                (A[,t] == 3) * (cos(10*t) * X[[t]] %*% rep(1, p_list[t]) - cos(10*t - 10) * X[[t-1]] %*% rep(1, p_list[t-1]) + sqrt(abs(cos(10*t - 20))) * X[[t-2]] %*% rep(1, p_list[t-2]))
         }
     }
     
