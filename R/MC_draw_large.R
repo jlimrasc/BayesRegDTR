@@ -1,7 +1,7 @@
 library(mvtnorm)
 library(MixMatrix)
 library(tictoc)
-compute_MC_draws <- function(D, tau, At_mags, B, nu0, V0) {
+compute_MC_draws_mvt <- function(D, tau, At_mags, B, nu0, V0, p_list) {
     draw_sigmat_b <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
         test <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
@@ -14,6 +14,7 @@ compute_MC_draws <- function(D, tau, At_mags, B, nu0, V0) {
 
     X <- D[-1]
     T <- length(X)
+    n <- nrow(X[[1]])
 
     sigmat_b_list   <- vector(mode = "list", length = T)
     Wt_b_list       <- vector(mode = "list", length = T)
