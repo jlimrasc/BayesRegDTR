@@ -1,11 +1,11 @@
 
 # D <- Data
 # tau <- 0.01
-# At_mags <- 1
+# At_lens <- 1
 # B <- 10000
 # alph <- 3
 # bet <- 4
-compute_MC_draws <- function(D, tau, At_mags, B, alph, bet, p_list) {
+compute_MC_draws <- function(D, tau, At_lens, B, alph, bet, p_list) {
     library(mvtnorm)
     draw_thetat_B <- function(ct, mt, omegat, B, alph, bet, n) {
         t(rmvt(B, sigma = (ct + 2*bet) / (n + 2 * alph) * solve(omegat),
@@ -56,4 +56,4 @@ compute_MC_draws <- function(D, tau, At_mags, B, alph, bet, p_list) {
 
 # source("~/GitHub/BayesRegDTR/R/datagen_univariate.R")
 # source("~/GitHub/BayesRegDTR/R/ModelFitting.R")
-res <- compute_MC_draws(D = Data, tau = 0.01, At_mags = 1, B = 10000, alph = 3, bet = 4, p_list = rep(1, T))
+res <- compute_MC_draws(D = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, bet = 4, p_list = rep(1, T))
