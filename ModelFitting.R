@@ -47,10 +47,10 @@ compute_mt <- function(Zt, thetat_hat, omegat) {
     solve(omegat) %*% t(Zt) %*% Zt %*% thetat_hat
 }
 
-t <- 3
-tau <- 0.01
-Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
-thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
-omegat      <- compute_omegat(Zt, tau)
-ct          <- compute_ct(Zt, X[[t]], omegat, n)
-mt          <- compute_mt(Zt, thetat_hat, omegat)
+# t <- 3
+# tau <- 0.01
+# Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
+# thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
+# omegat      <- compute_omegat(Zt, tau)
+# ct          <- compute_ct(Zt, X[[t]], omegat, n)
+# mt          <- compute_mt(Zt, thetat_hat, omegat)
