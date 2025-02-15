@@ -2,8 +2,7 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
     library(mvtnorm)
 
     # Step 1
-    # x_i1 <- matrix(rt(n * p_list[t], 10), nrow = n, ncol = p_list[t])
-    x_i1 <- rmvt(n, sigma = diag(p_list[1]), delta = rep(0, p_list[1]), type = c("shifted"))
+    x_i1 <- rmvt(n, sigma = diag(p_list[1]), df = 10, delta = rep(0, p_list[1]), type = c("shifted"))
 
     # Step 2
     A <- matrix(sample(1:At_len, n*T, replace = TRUE), nrow = n, ncol = T)

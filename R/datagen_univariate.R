@@ -2,7 +2,7 @@ generate_dataset_uvt <- function(n = 5000, T = 5, At_len = 3) {
     library(mvtnorm)
 
     # Step 1
-    x_i1 <- matrix(rt(n * p_list[1], 10), nrow = n, ncol = p_list[1])
+    x_i1 <- matrix(rt(n * p_list[1], df = 10), nrow = n, ncol = p_list[1])
 
     # Step 2
     A <- matrix(sample(1:At_len, n*T, replace = TRUE), nrow = n, ncol = T)
