@@ -21,13 +21,12 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, bet, p_list) {
         }
 
         # Run function for each b
-        browser()
         return(apply(thetat_b, 2, draw_sigmat_2b_inner,
               Zt = Zt, Xt = Xt, tau = tau, alph = alph, bet = bet, n = n))
     }
-    browser()
 
-    X <- D[-1]
+    X <- D[2:(T+1)]
+    A <- D[[T+2]]
     T <- length(X)
     n <- nrow(X[[1]])
 
@@ -35,7 +34,6 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, bet, p_list) {
     sigmat_2b_list <- vector(mode = "list", length = T)
     for (t in 2:T) {
         # Compute summary stats
-        browser()
         Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
         thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
         omegat      <- compute_omegat(Zt, tau)

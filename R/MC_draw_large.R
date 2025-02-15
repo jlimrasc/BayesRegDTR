@@ -15,7 +15,8 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
     }
 
     # Unpack data
-    X <- D[-1]
+    X <- D[2:(T+1)]
+    A <- D[[T+2]]
     T <- length(X)
     n <- nrow(X[[1]])
 
