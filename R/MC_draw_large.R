@@ -1,6 +1,7 @@
 library(mvtnorm)
 library(MixMatrix)
 library(tictoc)
+library(expm)
 compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  p_list) {
@@ -21,9 +22,9 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
 
         # Sqrtm version:
         R_list <- array(rnorm(B * pt * qt), dim = c(qt, pt, B))
-        # browser()
-        omegR_list <- apply(R_list, 3, FUN = function(R) omegat_inv %*% R, simplify = FALSE)
-        # browser()
+
+        omegat_inv_sqrtm <- sqrtm(omegat_inv)
+        omegR_list <- apply(R_list, 3, FUN = function(R) omegat_inv_sqrtm %*% R, simplify = FALSE)
         return(mapply(FUN = function(omegR, sigmatb) Mnt + omegR %*% sqrtm(sigmatb), omegR_list, sigmat_b, SIMPLIFY = FALSE))
     }
 
@@ -74,5 +75,5 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
 
 # source("~/GitHub/BayesRegDTR/R/datagen_multivariate.R")
 # source("~/GitHub/BayesRegDTR/R/ModelFitting.R")
-res4 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
+res6 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
                         V0 = diag(2), p_list = 2)

@@ -23,7 +23,7 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
 
         C <- C_max[1:p_list[t], 1:p_list[t-1]]
 
-        gen_xit <- function(X_it1, A2, A3, C, t) {
+        gen_xit <- function(X_it1, A2, A3, t) {
             A2 * ( t * C %*% X_it1) + # If a==2
             A3 * (-t * C %*% X_it1) # Elif a==3
         }
@@ -33,14 +33,14 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                      split(X[[t-1]], row(X[[t-1]])),
                      split(A[,t-1] == 2, 1:n),
                      split(A[,t-1] == 3, 1:n),
-                     C = C, t = t)))
+                     t = t)))
     }
 
     if (T > 2) {
         t <- 3
         C <- C_max[1:p_list[t], 1:p_list[t-1]]
         C2 <- C_max[1:p_list[t], 1:p_list[t-2]]
-        gen_xit <- function(X_it1, X_it2, A2, A3, C, C2, t, p_t) {
+        gen_xit <- function(X_it1, X_it2, A2, A3, t, p_t) {
             A2 * ( t * C %*% X_it1 -     (t-1) * C2 %*% X_it2) + # If a==2
             A3 * (-t * C %*% X_it1 + sqrt(t-1) * C2 %*% X_it2) # Elif a==3
         }
@@ -50,7 +50,7 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                      split(X[[t-2]], row(X[[t-2]])),
                      split(A[,t-1] == 2, 1:n),
                      split(A[,t-1] == 3, 1:n),
-                     C = C, C2 = C2, t = t)))
+                     t = t)))
     }
 
     if (T > 3) {
@@ -60,7 +60,7 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
             C2 <- C_max[1:p_list[t], 1:p_list[t-2]]
             C3 <- C_max[1:p_list[t], 1:p_list[t-3]]
 
-            gen_xit <- function(X_it1, X_it2, X_it3, A2, A3, C, C2, C3, t, p_t) {
+            gen_xit <- function(X_it1, X_it2, X_it3, A2, A3, t, p_t) {
                 A2 * ( t * C %*% X_it1 -     (t-1) * C2 %*% X_it2 +     (t-2) * C3 %*% X_it3) + # If a==2
                 A3 * (-t * C %*% X_it1 + sqrt(t-1) * C2 %*% X_it2 + sqrt(t-2) * C3 %*% X_it3) # Elif a==3
             }
@@ -72,14 +72,14 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
                          split(X[[t-3]], row(X[[t-3]])),
                          split(A[,t-1] == 2, 1:n),
                          split(A[,t-1] == 3, 1:n),
-                         C = C, C2 = C2, C3 = C3, t = t)))
+                         t = t)))
         }
     }
 
-    # Normalise X
-    if (T > 0) {
-        X <- lapply(X, function(Xt) apply(Xt, 2, function(z) (z-mean(z))/sd(z)))
-    }
+    # # Normalise X
+    # if (T > 0) {
+    #     X <- lapply(X, function(Xt) apply(Xt, 2, function(z) (z-mean(z))/sd(z)))
+    # }
 
     # Step 4
     mi <- 3
@@ -105,7 +105,7 @@ generate_dataset_mvt <- function(n, T, p_list, At_len) {
         }
     }
 
-    yi <- rnorm(n, mean = mi, sd = 1) # Check with WC, mi is n x p_t
+    yi <- rnorm(n, mean = mi, sd = 1)
     return(c(list(yi), X, list(A)))
 }
 
