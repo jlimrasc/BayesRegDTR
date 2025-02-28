@@ -8,7 +8,7 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
-Rcpp::List draw_Wt_b_cpp(const arma::mat& omegat_inv, const arma::mat& Mnt,
+Rcpp::List draw_Wt_B_cpp(const arma::mat& omegat_inv, const arma::mat& Mnt,
                                  const double tau, std::vector<arma::mat>& sigmatb,
                                  const int pt, const int qt, const int B) {
     Rcpp::List omegR_list(B);

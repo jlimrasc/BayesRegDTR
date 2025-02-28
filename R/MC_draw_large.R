@@ -16,16 +16,42 @@
 #' @examples
 compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-                                 p_list) {
+                                 alph, gam, p_list, ) {
     library(mvtnorm)
     library(MixMatrix)
     library(tictoc)
     library(expm)
-    draw_sigmat_b <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
+    draw_sigmat_B <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
         temp_rwish <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
 
         return(apply(temp_rwish, 3, solve, simplify = FALSE))
+    }
+
+    draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
+        t(rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
+               df = n+2*alph,
+               delta = mt,
+               type = "shifted")) # Draw all B at once
+    }
+
+    draw_sigmat_2B <- function(thetat_b, Zt, Xt, tau, alph, gam, n) {
+        draw_sigmat_2b_inner <- function(thetat_b, Zt, Xt, tau, alph, gam, n) {
+            1 / rgamma(1, shape = alph + (n + ncol(Zt)) / 2,
+                       rate = gam + 1/2 * (sum((Xt - Zt %*% thetat_b)^2) + tau * sum(thetat_b^2)))
+        }
+
+        # Run function for each b
+        return(apply(thetat_b, 2, draw_sigmat_2b_inner,
+                     Zt = Zt, Xt = Xt, tau = tau, alph = alph, gam = gam, n = n))
+    }
+
+    draw_beta_B <- function(cT1, mT1, omegaT1_inv, B, alph, gam, n) {
+        return(draw_thetat_B(cT1, mT1, omegaT1_inv, B, alph, gam, n))
+    }
+
+    draw_sigmay_2B <- function(beta_b, ZT1, y, tau, alph, gam, n) {
+        return(draw_sigmat_2B(beta_b, ZT1, y, tau, alph, gam, n))
     }
 
     # Unpack data
@@ -47,8 +73,8 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
 
     if (tau < 0) stop("Value of tau must be positive")
 
-    sigmat_b_list   <- vector(mode = "list", length = T)
-    Wt_b_list       <- vector(mode = "list", length = T)
+    sigmat_B_list   <- vector(mode = "list", length = T)
+    Wt_B_list       <- vector(mode = "list", length = T)
     for (t in 2:T) {
         # Compute summary stats
         Zt          <- compute_Zt(A, At_lens[t], X, t, n, p_list)
@@ -58,22 +84,39 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
         Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
 
         # Draw
-        tic(cat('\n', 't = ', t, ' sigmat_b: ', sep = ''))
-        sigmat_b <- draw_sigmat_b(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
+        tic(paste('t =', t, 'sigmat_B: '))
+        sigmat_B <- draw_sigmat_B(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
         toc(log = TRUE)
 
-        tic(cat('\n', 't = ', t, ' Wtb: ', sep = ''))
-        Wt_b <- draw_Wt_b_cpp(omegat_inv, Mnt, tau, sigmat_b, p_list[t], ncol(Zt), B)
+        tic(paste('t =', t, 'Wtb: '))
+        Wt_B <- draw_Wt_B_cpp(omegat_inv, Mnt, tau, sigmat_B, p_list[t], ncol(Zt), B)
         toc(log = TRUE)
 
 
         # Store
-        sigmat_b_list[[t]]  <- sigmat_b
-        # Wt_b_list[[t]] <- Wt_b
+        sigmat_B_list[[t]]  <- sigmat_B
+        Wt_B_list[[t]] <- Wt_B
     }
 
-    return(list(sigmat_b_list = sigmat_b_list, Wt_b_list = Wt_b_list))
+    tic(paste(T+1, "summary"))
+    ZT1         <- compute_Zt(A, At_len, X, T+1, n, p_list)
+    thetaT1_hat <- compute_thetat_hat(ZT1, y)
+    omegaT1     <- compute_omegat(ZT1, tau)
+    omegaT1_inv <- solve(omegaT1)
+    cT1         <- compute_ct(ZT1, y, omegaT1_inv, n)
+    mT1         <- compute_mt(ZT1, thetaT1_hat, omegaT1_inv)
+    toc()
+
+    tic('thetat_b')
+    beta_B <- draw_beta_B(cT1, mT1, omegaT1_inv, B, alph, gam, n)
+    toc()
+    tic('sigmat_2b')
+    sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
+    toc()
+
+    return(list(sigmat_B_list = sigmat_B_list, Wt_B_list = Wt_B_list,
+                beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
 
 # res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
-#                              V0 = diag(2), p_list = 2)
+#                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)

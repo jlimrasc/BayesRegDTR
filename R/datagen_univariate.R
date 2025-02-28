@@ -79,5 +79,6 @@ p_list  <- rep(1, T)
 At_len  <- 3
 
 Data <- generate_dataset_uvt(n, T, At_len)
-# Data <- res[1:(T+1)]
+# X <- Data[2:(T+1)]
 # A <- Data[[T+2]]
+# y <- Data[[1]]
