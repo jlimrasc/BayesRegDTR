@@ -1,37 +1,37 @@
-library(mvtnorm)
-library(MixMatrix)
-library(tictoc)
-library(expm)
+#' Title
+#'
+#' @param D
+#' @param tau
+#' @param At_lens
+#' @param B
+#' @param nu0
+#' @param V0
+#' @param p_list
+#'
+#' @returns
+#' @useDynLib BayesRegDTR, .registration = TRUE
+#' @importFrom Rcpp evalCpp
+#' @export
+#'
+#' @examples
 compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  p_list) {
+    library(mvtnorm)
+    library(MixMatrix)
+    library(tictoc)
+    library(expm)
     draw_sigmat_b <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
         temp_rwish <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
+
         return(apply(temp_rwish, 3, solve, simplify = FALSE))
     }
 
-    draw_Wt_b <- function(omegat_inv, Mnt, tau, sigmat_b, t, pt, qt) {
-        # Matrix norm
-        # lapply(sigmat_b, FUN = function(z) rmatrixnorm(1, mean = Mnt, U = solve(omegat), V = z))
-
-        # Use sqrtm
-        # Eigen version:
-        # ev <- eigen(solve(omegat))
-        # sqrtm_omegat <- ev$vectors %*% diag(sqrt(ev$values)) %*% solve(ev$vectors)
-
-        # Sqrtm version:
-        R_list <- array(rnorm(B * pt * qt), dim = c(qt, pt, B))
-
-        omegat_inv_sqrtm <- sqrtm(omegat_inv)
-        omegR_list <- apply(R_list, 3, FUN = function(R) omegat_inv_sqrtm %*% R, simplify = FALSE)
-        return(mapply(FUN = function(omegR, sigmatb) Mnt + omegR %*% sqrtm(sigmatb), omegR_list, sigmat_b, SIMPLIFY = FALSE))
-    }
-
     # Unpack data
+    T <- length(D) - 2
     X <- D[2:(T+1)]
     A <- D[[T+2]]
-    T <- length(X)
     n <- nrow(X[[1]])
 
     # Input validation
@@ -58,22 +58,22 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
         Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
 
         # Draw
+        tic(cat('\n', 't = ', t, ' sigmat_b: ', sep = ''))
         sigmat_b <- draw_sigmat_b(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
+        toc(log = TRUE)
 
-        tic(t)
-        Wt_b <- draw_Wt_b(omegat_inv, Mnt, tau, sigmat_b, t, p_list[t], ncol(Zt))
-        toc()
+        tic(cat('\n', 't = ', t, ' Wtb: ', sep = ''))
+        Wt_b <- draw_Wt_b_cpp(omegat_inv, Mnt, tau, sigmat_b, p_list[t], ncol(Zt), B)
+        toc(log = TRUE)
 
 
         # Store
         sigmat_b_list[[t]]  <- sigmat_b
-        Wt_b_list[[t]] <- Wt_b
+        # Wt_b_list[[t]] <- Wt_b
     }
 
-        return(list(sigmat_b_list = sigmat_b_list, Wt_b_list = Wt_b_list))
+    return(list(sigmat_b_list = sigmat_b_list, Wt_b_list = Wt_b_list))
 }
 
-# source("~/GitHub/BayesRegDTR/R/datagen_multivariate.R")
-# source("~/GitHub/BayesRegDTR/R/ModelFitting.R")
-res6 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
-                        V0 = diag(2), p_list = 2)
+# res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
+#                              V0 = diag(2), p_list = 2)

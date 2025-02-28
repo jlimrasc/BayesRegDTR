@@ -113,10 +113,10 @@ set.seed(1) #remove later
 
 # Starting Scalar values
 n       <- 5000
-T       <- 5
+T       <- 6
 p_list  <- rep(2, T)
 At_len  <- 3
 
 Data <- generate_dataset_mvt(n, T, p_list, At_len)
 # Data <- res[1:(T+1)]
-A <- Data[[T+2]]
+# A <- Data[[T+2]]

@@ -1,5 +1,5 @@
-library(gtools)
 compute_Zt <- function(A, At_len, X, t, n, p_list) {
+    library(gtools)
     st <- function(A, key, t) {
         return(
             if(is.vector(tempRes <- A[,1:(t-1)] == rep(key, each = n)))
@@ -7,13 +7,13 @@ compute_Zt <- function(A, At_len, X, t, n, p_list) {
             else
                 apply(tempRes, 1, all)) # Makes sure all of row is true
     }
-    
+
     p_sum   <- sum(p_list[1:(t-1)])
     Z_tilde <- matrix(unlist(X[1:(t-1)]), nrow = n, ncol = p_sum)
 
     # Calculate permutations of a1, ..., an
     perms <- permutations(At_len, t-1, repeats.allowed = TRUE)
-    
+
     # Preallocate Zt
     Zt <- matrix(0, nrow = n, ncol = sum(p_list[1:(t-1)]) * nrow(perms))
 
@@ -26,7 +26,7 @@ compute_Zt <- function(A, At_len, X, t, n, p_list) {
     # Check size
     if ((ans <- ncol(Zt)) != (proper <- p_sum * At_len^(t-1)))
         stop("Zt does not have the right amount of columns: ", ans, " != ", proper)
-    
+
     return(Zt)
 }
 

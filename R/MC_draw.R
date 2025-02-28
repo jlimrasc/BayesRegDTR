@@ -25,9 +25,9 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, bet, p_list) {
               Zt = Zt, Xt = Xt, tau = tau, alph = alph, bet = bet, n = n))
     }
 
+    T <- length(D) - 2
     X <- D[2:(T+1)]
     A <- D[[T+2]]
-    T <- length(X)
     n <- nrow(X[[1]])
 
     thetat_b_list  <- vector(mode = "list", length = T)
@@ -54,4 +54,4 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, bet, p_list) {
 
 # source("~/GitHub/BayesRegDTR/R/datagen_univariate.R")
 # source("~/GitHub/BayesRegDTR/R/ModelFitting.R")
-res <- compute_MC_draws(D = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, bet = 4, p_list = rep(1, T))
+# res <- compute_MC_draws(D = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, bet = 4, p_list = rep(1, T))
