@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// draw_Wt_b_cpp
-Rcpp::List draw_Wt_b_cpp(const arma::mat& omegat_inv, const arma::mat& Mnt, const double tau, std::vector<arma::mat>& sigmatb, const int pt, const int qt, const int B);
-RcppExport SEXP _BayesRegDTR_draw_Wt_b_cpp(SEXP omegat_invSEXP, SEXP MntSEXP, SEXP tauSEXP, SEXP sigmatbSEXP, SEXP ptSEXP, SEXP qtSEXP, SEXP BSEXP) {
+// draw_Wt_B_cpp
+Rcpp::List draw_Wt_B_cpp(const arma::mat& omegat_inv, const arma::mat& Mnt, const double tau, std::vector<arma::mat>& sigmatb, const int pt, const int qt, const int B);
+RcppExport SEXP _BayesRegDTR_draw_Wt_B_cpp(SEXP omegat_invSEXP, SEXP MntSEXP, SEXP tauSEXP, SEXP sigmatbSEXP, SEXP ptSEXP, SEXP qtSEXP, SEXP BSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,13 +24,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type pt(ptSEXP);
     Rcpp::traits::input_parameter< const int >::type qt(qtSEXP);
     Rcpp::traits::input_parameter< const int >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(draw_Wt_b_cpp(omegat_inv, Mnt, tau, sigmatb, pt, qt, B));
+    rcpp_result_gen = Rcpp::wrap(draw_Wt_B_cpp(omegat_inv, Mnt, tau, sigmatb, pt, qt, B));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BayesRegDTR_draw_Wt_b_cpp", (DL_FUNC) &_BayesRegDTR_draw_Wt_b_cpp, 7},
+    {"_BayesRegDTR_draw_Wt_B_cpp", (DL_FUNC) &_BayesRegDTR_draw_Wt_B_cpp, 7},
     {NULL, NULL, 0}
 };
 

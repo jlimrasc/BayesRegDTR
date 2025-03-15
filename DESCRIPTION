@@ -18,6 +18,7 @@ Imports:
     MixMatrix, 
     expm, 
     gtools, 
+    VBel,
     tictoc
 LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8

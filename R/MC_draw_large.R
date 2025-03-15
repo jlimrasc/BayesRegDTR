@@ -16,7 +16,7 @@
 #' @examples
 compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-                                 alph, gam, p_list, ) {
+                                 alph, gam, p_list ) {
     library(mvtnorm)
     library(MixMatrix)
     library(tictoc)
@@ -57,6 +57,7 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
     # Unpack data
     T <- length(D) - 2
     X <- D[2:(T+1)]
+    y <- D[[1]]
     A <- D[[T+2]]
     n <- nrow(X[[1]])
 
@@ -100,6 +101,7 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
 
     tic(paste(T+1, "summary"))
     ZT1         <- compute_Zt(A, At_len, X, T+1, n, p_list)
+    browser()
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)
@@ -118,5 +120,5 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
 
-# res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 10000, nu0 = 3,
-#                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
+                             V0 = diag(2), alph = 3, gam = 4, p_list = 2)

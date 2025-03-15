@@ -14,7 +14,7 @@ Rcpp::List draw_Wt_B_cpp(const arma::mat& omegat_inv, const arma::mat& Mnt,
     Rcpp::List omegR_list(B);
     arma::mat omegat_inv_sqrtm = arma::sqrtmat_sympd(omegat_inv); // Pre-calculate sqrtm
     for (int i = 0; i < B; i++) {
-        omegR_list[i] = Mnt + omegat_inv_sqrtm * arma::randn(qt, pt) * arma::sqrtmat_sympd(sigmatb[0]);
+        omegR_list[i] = Mnt + omegat_inv_sqrtm * arma::randn(qt, pt) * arma::sqrtmat_sympd(sigmatb[i]);
     }
 
     return omegR_list;
