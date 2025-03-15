@@ -10,7 +10,7 @@
 #'
 #' @returns
 #' @useDynLib BayesRegDTR, .registration = TRUE
-#' @importFrom Rcpp evalCpp
+#' @importFrom Rcpp sourceCpp
 #' @export
 #'
 #' @examples
@@ -120,5 +120,5 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
 
-res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
-                             V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+# res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
+#                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)

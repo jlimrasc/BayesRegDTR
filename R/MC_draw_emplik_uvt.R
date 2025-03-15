@@ -9,12 +9,15 @@
 # }
 
 h_t <- function(Zti, thetat) {
-    print(paste0('Zti:\n', Zti, "\nthetat:\n", thetat, "\n"))
+    print("Zti:")
+    print(Zti)
+    print("thetat:")
+    print(thetat)
     x_it <- Zti[length(Zti) / 2]
     return(t(Zti) %*% (x_it - Zti %*% thetat))
 }
 
-h_t <- function(ZT1i, thetat) {
+h_ty <- function(ZT1i, thetat) {
     yi <- ZT1i[1]
     return(t(ZT1i) %*% (yi - ZT1i %*% thetat)) # Assume Beta is meant 2 be theta?
 }
@@ -38,8 +41,34 @@ delbet_logpi <- function(beta) {
 library(VBel)
 X_mat <- matrix(unlist(X), nrow = n, ncol = T)
 
+t <- T
+tau <- 0.01
 
-compute_GVA(mu0 = Mnt, C0 = diag(qt), h = h_t,
+Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
+omegat      <- compute_omegat(Zt, tau)
+omegat_inv  <- solve(omegat)
+
+Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
+qt <- ncol(Zt)
+
+thetat_b_list <- vector(mode = "list", length = T)
+
+# Step 2 for (t in 2:T)
+res <- compute_GVA(mu0 = Mnt, C0 = diag(qt), h = h_t,
             delthh = delth_h, delth_logpi = delth_logpi, lam0 = rep(0, qt),
             rho = 0.9, epsil = 1e-6, a = 1e-3,
-            z = cbind(X_mat[,1:t], A[,1:t]))
+            z = cbind(X_mat[,1:t], A[,1:(t - 1)]))
+
+thetat_b <- rnorm(B, res$mu_FC, res$C_FC %*% t(res$C_FC))
+
+thetat_b_list[t] <- thetat_b
+
+# Step 3
+resy <- compute_GVA(mu0 = MnT1, C0 = diag(qT1), h = h_ty,
+            delthh = delbet_hy, delth_logpi = delbet_logpi, lam0 = rep(0, qT1),
+            rho = 0.9, epsil = 1e-6, a = 1e-3,
+            z = cbind(y, X_mat, A))
+
+# Step 4
+bet_b <- rnorm(B, resy$mu_FC, resy$C_FC %*% t(resy$C_FC))
+
