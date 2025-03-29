@@ -11,6 +11,8 @@ compute_MC_draws_mvt(
   B,
   nu0,
   V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
+  alph,
+  gam,
   p_list
 )
 }

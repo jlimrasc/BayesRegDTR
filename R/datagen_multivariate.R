@@ -113,7 +113,7 @@ set.seed(1) #remove later
 
 # Starting Scalar values
 n       <- 5000
-T       <- 5
+T       <- 3
 p_list  <- rep(2, T)
 At_len  <- 3
 

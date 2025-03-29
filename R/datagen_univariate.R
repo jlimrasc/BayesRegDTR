@@ -39,9 +39,9 @@ generate_dataset_uvt <- function(n = 5000, T = 5, At_len = 3) {
     }
 
     # Normalise X
-    if (T > 0) {
-        X <- lapply(X, function(Xt) apply(Xt, 2, function(z) (z-mean(z))/sd(z)))
-    }
+    # if (T > 0) {
+    #     X <- lapply(X, function(Xt) apply(Xt, 2, function(z) (z-mean(z))/sd(z)))
+    # }
 
     # Step 4
     mi <- 3
@@ -73,12 +73,12 @@ generate_dataset_uvt <- function(n = 5000, T = 5, At_len = 3) {
 set.seed(1) #remove later
 
 # Starting Scalar values
-n       <- 5000
-T       <- 5
+n       <- 100#500#0
+T       <- 3#5
 p_list  <- rep(1, T)
 At_len  <- 3
 
 Data <- generate_dataset_uvt(n, T, At_len)
-# X <- Data[2:(T+1)]
-# A <- Data[[T+2]]
-# y <- Data[[1]]
+X <- Data[2:(T+1)]
+A <- Data[[T+2]]
+y <- Data[[1]]
