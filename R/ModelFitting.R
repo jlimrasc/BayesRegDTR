@@ -2,20 +2,32 @@ compute_Zt <- function(A, At_len, X, t, n, p_list) {
     library(gtools)
     st <- function(A, key, t) {
         return(
-            if(is.vector(tempRes <- A[,1:(t-1)] == rep(key, each = n)))
+            if(is.vector(tempRes <- A[, 1:(t - 1), drop = FALSE] == rep(key, each = n)))
                 tempRes
             else
                 apply(tempRes, 1, all)) # Makes sure all of row is true
     }
 
     p_sum   <- sum(p_list[1:(t-1)])
-    Z_tilde <- matrix(unlist(X[1:(t-1)]), nrow = n, ncol = p_sum)
+
+    # Fix X format
+    if (is.list(X)) {
+        Z_tilde <- matrix(unlist(X[1:(t-1)]), nrow = n, ncol = p_sum)
+    } else if (is.matrix(X) &&
+               NROW(X) >= n &&
+               NCOL(X) >= sum(p_list[1:(t - 1)])) {
+        Z_tilde <- X[1:n, 1:sum(p_list[1:(t - 1)])]
+    } else {
+        stop("X must be a list or matrix")
+    }
+
 
     # Calculate permutations of a1, ..., an
     perms <- permutations(At_len, t-1, repeats.allowed = TRUE)
+    # browser()
 
     # Preallocate Zt
-    Zt <- matrix(0, nrow = n, ncol = sum(p_list[1:(t-1)]) * nrow(perms))
+    Zt <- matrix(0, nrow = n, ncol = sum(p_list[1:(t - 1)]) * nrow(perms))
 
     # Compute Zt
     for (i in 1:nrow(perms)) {
