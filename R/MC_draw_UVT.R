@@ -1,4 +1,40 @@
-compute_MC_draws <- function(D, tau, At_lens, B, alph, gam, p_list) {
+#' Compute Monte Carlo Draws from Univariate Dataset
+#'
+#' @description
+#' Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
+#'
+#' @param Data      Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+                 #' X is a list of matrices of the intermediate covariates
+                 #' and A is a matrix of the assigned treatments
+#' @param tau       Prior precision scale. Should be specified with a small value
+#' @param At_lens   Vector of number of treatment options at each stage
+#' @param B         Number of MC draws
+#' @param alph      Inverse-gamma shape
+#' @param gam       Inverse-gamma rate
+#' @param p_list    Vector of dimension for each stage IS THIS REQUIRED???????????????????????????????????????????????????????????????????????
+#'
+#' @returns Monte Carlo draws??? A list containing:  \enumerate{
+#'              \item thetat_B_list: Desc. A list of length T with each element a vector of length B
+#'              \item sigmat_2B_list: Desc. A list of length T with each element a vector of length B
+#'              \item beta_B: Desc. A list of length B
+#'              \item sigmay_2B: Desc. A list of length B
+#'              }
+#' @export
+#'
+#' @examples
+#' # -----------------------------
+#' # Initialise Inputs
+#' # -----------------------------
+#' n           <- 500
+#' num_treats  <- 5
+#' At_len      <- 3
+#' Data <- generate_dataset_uvt(n, num_treats, At_len)
+#'
+#' # -----------------------------
+#' # Main
+#' # -----------------------------
+#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, T))
+compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
     library(mvtnorm)
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
         t(rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
@@ -26,10 +62,10 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, gam, p_list) {
         return(draw_sigmat_2B(beta_b, ZT1, y, tau, alph, gam, n))
     }
 
-    T <- length(D) - 2
-    X <- D[2:(T+1)]
-    y <- D[[1]]
-    A <- D[[T+2]]
+    T <- length(Data) - 2
+    X <- Data[2:(T+1)]
+    y <- Data[[1]]
+    A <- Data[[T+2]]
     n <- nrow(X[[1]])
 
     thetat_B_list  <- vector(mode = "list", length = T)
@@ -77,13 +113,3 @@ compute_MC_draws <- function(D, tau, At_lens, B, alph, gam, p_list) {
     return(list(thetat_B_list = thetat_B_list, sigmat_2B_list = sigmat_2B_list,
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
-
-# source("~/GitHub/BayesRegDTR/R/datagen_univariate.R")
-# source("~/GitHub/BayesRegDTR/R/ModelFitting.R")
-# D <- Data
-# tau <- 0.01
-# At_lens <- 1
-# B <- 10000
-# alph <- 3
-# gam <- 4
-# res <- compute_MC_draws(D = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, T))

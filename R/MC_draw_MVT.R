@@ -1,20 +1,44 @@
-#' Title
+#' Compute Monte Carlo Draws from Multivariate Dataset
 #'
-#' @param D
-#' @param tau
-#' @param At_lens
-#' @param B
-#' @param nu0
-#' @param V0
-#' @param p_list
+#' @description
+#' Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 #'
-#' @returns
+#' @param Data      Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+#' X is a list of matrices of the intermediate covariates
+#' and A is a matrix of the assigned treatments
+#' @param tau       Prior precision scale. Should be specified with a small value
+#' @param At_lens   Vector of number of treatment options at each stage
+#' @param B         Number of MC draws
+#' @param nu0       Inverse-Wishart degres of freedom
+#' @param V0        Inverse-Wishart scale matrix
+#' @param p_list    Vector of dimension for each stage
+#'
+#' @returns Monte Carlo draws??? A list containing:  \enumerate{
+#'              \item sigmat_B_list: Desc. A list of length T with each element a vector of size B x p_t
+#'              \item Wt_B_list: Desc. A list of length T with each element a matrix of size B x p_t
+#'              \item beta_B: Desc. A list of length B
+#'              \item sigmay_2B: Desc. A list of length B
+#'              }
 #' @useDynLib BayesRegDTR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @export
 #'
 #' @examples
-compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
+#' # -----------------------------
+#' # Initialise Inputs
+#' # -----------------------------
+#' n           <- 5000
+#' num_treats  <- 3
+#' p_list      <- rep(2, num_treats)
+#' At_len      <- 3
+#' Data        <- generate_dataset_mvt(n, num_treats, p_list, At_len)
+#'
+#' # -----------------------------
+#' # Main
+#' # -----------------------------
+#' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
+V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  alph, gam, p_list ) {
     library(mvtnorm)
@@ -55,10 +79,10 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
     }
 
     # Unpack data
-    T <- length(D) - 2
-    X <- D[2:(T+1)]
-    y <- D[[1]]
-    A <- D[[T+2]]
+    T <- length(Data) - 2
+    X <- Data[2:(T+1)]
+    y <- Data[[1]]
+    A <- Data[[T+2]]
     n <- nrow(X[[1]])
 
     # Input validation
@@ -119,6 +143,3 @@ compute_MC_draws_mvt <- function(D, tau, At_lens, B, nu0,
     return(list(sigmat_B_list = sigmat_B_list, Wt_B_list = Wt_B_list,
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
-
-# res3 <- compute_MC_draws_mvt(D = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
-#                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)

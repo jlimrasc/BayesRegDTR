@@ -15,12 +15,6 @@ h_t_wrap <- function(At_len, p_list, t) {
         X       <- t(head(data, mid))
         A       <- t(tail(data, mid - 1))
         Zti <- compute_Zt(A, At_len, X, t, 1, p_list)
-        # print("Zti:")
-        # print(Zti)
-        # print("thetat:")
-        # print(thetat)
-        #
-        # print(t(Zti) %*% (x_it - Zti %*% thetat))
 
         return(t(Zti) %*% (x_it - Zti %*% thetat))
     }
@@ -31,12 +25,11 @@ h_t_wrap <- function(At_len, p_list, t) {
 h_ty_wrap <- function(At_len, p_list, t) {
     h_ty <- function(data, beta) {
         mid     <- length(data) %/% 2 + 1
-        x_it    <- data[mid]
-        X       <- t(head(data, mid))
+        X       <- t(data[2:mid])
         A       <- t(tail(data, mid - 1))
-        Zti <- compute_Zt(A, At_len, X, t, 1, p_list)
+        ZT1i <- compute_Zt(A, At_len, X, t, 1, p_list)
 
-        yi <- ZT1i[1]
+        yi <- data[1]
         return(t(ZT1i) %*% (yi - ZT1i %*% beta))
     }
 }
@@ -44,7 +37,6 @@ h_ty_wrap <- function(At_len, p_list, t) {
 delth_h_wrap <- function(At_len, p_list, t) {
     delth_h <- function(data, th) {
         mid     <- length(data) %/% 2 + 1
-        x_it    <- data[mid]
         X       <- t(head(data, mid))
         A       <- t(tail(data, mid - 1))
         Zti <- compute_Zt(A, At_len, X, t, 1, p_list)
@@ -56,10 +48,9 @@ delth_h_wrap <- function(At_len, p_list, t) {
 delbet_hy_wrap <- function(At_len, p_list, t) {
     delbet_hy <- function(data, th) {
         mid     <- length(data) %/% 2 + 1
-        x_it    <- data[mid]
-        X       <- t(head(data, mid))
+        X       <- t(data[2:mid])
         A       <- t(tail(data, mid - 1))
-        Zti <- compute_Zt(A, At_len, X, t, 1, p_list)
+        ZT1i <- compute_Zt(A, At_len, X, t, 1, p_list)
 
         return(-t(ZT1i) %*% ZT1i)
     }
@@ -70,7 +61,7 @@ delth_logpi <- function(thetat) {
 }
 
 delbet_logpi <- function(beta) {
-    ret-bet / 100
+    return(-beta / 100)
 }
 
 library(VBel)
@@ -89,24 +80,53 @@ qt <- ncol(Zt)
 thetat_b_list <- vector(mode = "list", length = T)
 
 # Step 2 for (t in 2:T)
-res <- compute_GVA(mu0 = Mnt, C0 = diag(qt), h = h_t_wrap(At_len, p_list, t),
+res1 <- compute_GVA(mu0 = Mnt, C0 = diag(qt), h = h_t_wrap(At_len, p_list, t),
             delthh = delth_h_wrap(At_len, p_list, t),
             delth_logpi = delth_logpi, lam0 = rep(0, qt),
             rho = 0.9, epsil = 1e-6, a = 1e-3,
-            z = cbind(X_mat[,1:t], A[,1:(t - 1)]), verbosity = 10,
-            SDG_iters = 100, AEL_iters = 250)
+            z = cbind(X_mat[,1:t], A[,1:(t - 1)]), verbosity = 100,
+            SGD_iters = 10000, AEL_iters = 500)
 
 thetat_b <- rnorm(B, res$mu_FC, res$C_FC %*% t(res$C_FC))
 
 thetat_b_list[t] <- thetat_b
 
 # Step 3
-resy <- compute_GVA(mu0 = MnT1, C0 = diag(qT1), h = h_ty_wrap(At_len, p_list, t),
+t <- 3
+B <- 100
+ZT          <- compute_Zt(A, At_len, X, t, n, p_list)
+omegaT      <- compute_omegat(ZT, tau)
+omegaT_inv  <- solve(omegaT)
+
+MnT <- omegaT_inv %*% t(ZT) %*% y
+qT <- ncol(ZT)
+library(tictoc)
+tic("resy")
+resy <- compute_GVA(mu0 = MnT, C0 = diag(qT), h = h_ty_wrap(At_len, p_list, t),
             delthh = delbet_hy_wrap(At_len, p_list, t),
-            delth_logpi = delbet_logpi, lam0 = rep(0, qT1),
+            delth_logpi = delbet_logpi, lam0 = rep(0, qT),
             rho = 0.9, epsil = 1e-6, a = 1e-3,
-            z = cbind(y, X_mat, A))
+            z = cbind(y, X_mat, A), verbosity = 100,
+            SGD_iters = 10000, AEL_iters = 500)
+toc()
 
 # Step 4
 bet_b <- rnorm(B, resy$mu_FC, resy$C_FC %*% t(resy$C_FC))
-
+#
+# testfun <- function(th, h, lam0, a, z, iters = 500) {
+#     p <- ncol(z)
+#     n <- nrow(z) + 1
+#     h_sum <- 0
+#     H_Zth <- c()
+#
+#     for (i in 1:(n - 1)) {
+#         zi <- matrix(z[i, ], nrow = p) # Row of z as vertical vector
+#         h_zith <- h(zi, th)
+#
+#         h_sum <- h_sum + h_zith # For h(zn,th)
+#         H_Zth <- rbind(H_Zth, t(h_zith)) # Build up H(Z,th)
+#     }
+#
+#     h_znth <- -a / (n - 1) * h_sum
+#     H_Zth <- rbind(H_Zth, t(h_znth)) # Last row of H is h(zn,th)
+# }
