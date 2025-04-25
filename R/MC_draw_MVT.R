@@ -20,7 +20,7 @@
 #'              \item sigmay_2B: Desc. A list of length B
 #'              }
 #' @useDynLib BayesRegDTR, .registration = TRUE
-#' @importFrom Rcpp sourceCpp
+#' @importFrom Rcpp evalCpp
 #' @export
 #'
 #' @examples
@@ -36,8 +36,7 @@
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
-V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+#' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
 compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  alph, gam, p_list ) {
@@ -125,7 +124,6 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
 
     tic(paste(T+1, "summary"))
     ZT1         <- compute_Zt(A, At_len, X, T+1, n, p_list)
-    browser()
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)
