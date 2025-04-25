@@ -138,6 +138,6 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
     sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
     toc()
 
-    return(list(sigmat_B_list = sigmat_B_list, Wt_B_list = Wt_B_list,
+    return(list(sigmat_B_list = sigmat_B_list[-1], Wt_B_list = Wt_B_list[-1],
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }

@@ -110,6 +110,6 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
     sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
     toc()
 
-    return(list(thetat_B_list = thetat_B_list, sigmat_2B_list = sigmat_2B_list,
+    return(list(thetat_B_list = thetat_B_list[-1], sigmat_2B_list = sigmat_2B_list[-1],
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
 }
