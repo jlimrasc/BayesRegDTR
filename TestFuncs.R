@@ -2,7 +2,7 @@
 set.seed(1) #remove later
 
 # Starting Scalar values
-n           <- 5000
+n           <- 500#0
 num_treats  <- 3
 p_list      <- rep(2, num_treats)
 At_len      <- 3
@@ -30,9 +30,11 @@ X <- Data[2:(num_treats+1)]
 A <- Data[[num_treats+2]]
 y <- Data[[1]]
 
-# tau <- 0.01
-# At_lens <- 1
-# B <- 10000
-# alph <- 3
-# gam <- 4
-res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, T))
+tau <- 0.01
+At_lens <- 1
+B <- 10000
+alph <- 3
+gam <- 4
+res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, At_lens = 1, B = 10000,
+                                alph = 3, gam = 4, p_list = rep(1, num_treats))
+
