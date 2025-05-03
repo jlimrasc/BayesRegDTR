@@ -40,8 +40,8 @@ Obtain Monte Carlo draws from posterior distribution of stagewise regression par
 # -----------------------------
 n           <- 500
 num_treats  <- 5
-At_len      <- 3
-Data <- generate_dataset_uvt(n, num_treats, At_len)
+At_lens     <- rep(3, num_treats)
+Data <- generate_dataset_uvt(n, num_treats, At_lens)
 
 # -----------------------------
 # Main

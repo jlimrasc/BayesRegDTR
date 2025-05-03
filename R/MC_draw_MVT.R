@@ -30,8 +30,8 @@
 #' n           <- 5000
 #' num_treats  <- 3
 #' p_list      <- rep(2, num_treats)
-#' At_len      <- 3
-#' Data        <- generate_dataset_mvt(n, num_treats, p_list, At_len)
+#' At_lens     <- rep(3, num_treats)
+#' Data        <- generate_dataset_mvt(n, num_treats, p_list, At_lens)
 #'
 #' # -----------------------------
 #' # Main
@@ -101,7 +101,7 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
     Wt_B_list       <- vector(mode = "list", length = T)
     for (t in 2:T) {
         # Compute summary stats
-        Zt          <- compute_Zt(A, At_lens[t], X, t, n, p_list)
+        Zt          <- compute_Zt(A, At_lens, X, t, n, p_list)
         omegat      <- compute_omegat(Zt, tau)
         omegat_inv  <- solve(omegat)
 
@@ -123,7 +123,7 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
     }
 
     tic(paste(T+1, "summary"))
-    ZT1         <- compute_Zt(A, At_len, X, T+1, n, p_list)
+    ZT1         <- compute_Zt(A, At_lens, X, T+1, n, p_list)
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)

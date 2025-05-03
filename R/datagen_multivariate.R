@@ -3,7 +3,7 @@
 #' @param n             Number of samples to generate
 #' @param num_treats    Total number of stages per sample
 #' @param p_list        Vector of dimension for each stage
-#' @param At_len        Vector of number of treatment options at each stage
+#' @param At_lens       Vector of number of treatment options at each stage
 #'
 #' @returns Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
          #' X is a list of matrices of the intermediate covariates
@@ -17,23 +17,24 @@
 #' n           <- 5000
 #' num_treats  <- 3
 #' p_list      <- rep(2, num_treats)
-#' At_len      <- 3
+#' At_lens     <- rep(3, num_treats)
 #'
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' Data        <- generate_dataset_mvt(n, num_treats, p_list, At_len)
-generate_dataset_mvt <- function(n, num_treats, p_list, At_len) {
+#' Data        <- generate_dataset_mvt(n, num_treats, p_list, At_lens)
+generate_dataset_mvt <- function(n, num_treats, p_list, At_lens) {
     library(mvtnorm)
+
+    stopifnot("At_lens length must equal num_treats" = length(force(At_lens)) == num_treats)
 
     # Step 1
     x_i1 <- rmvt(n, sigma = diag(p_list[1]), df = 10, delta = rep(0, p_list[1]), type = c("shifted"))
 
     # Step 2
-    A <- matrix(sample(1:At_len, n*num_treats, replace = TRUE), nrow = n, ncol = num_treats)
+    A <- sapply(At_lens, function(a_max) sample(a_max, n, replace = TRUE))
 
     # Step 3
-    # X <- array(0, dim = c(n, p_t, num_treats)) # Preallocate
     X <- vector(mode = 'list', length = num_treats) # Preallocate
 
     # Run first 3 lines fist bc inefficient to check for numeric(0)s

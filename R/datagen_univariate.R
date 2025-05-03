@@ -2,7 +2,7 @@
 #'
 #' @param n             Number of samples to generate
 #' @param num_treats    Total number of stages per sample
-#' @param At_len        Vector of number of treatment options at each stage
+#' @param At_lens        Vector of number of treatment options at each stage
 #'
 #' @returns Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
 #' X is a list of matrices of the intermediate covariates
@@ -14,15 +14,17 @@
 #' # -----------------------------
 #' n           <- 500
 #' num_treats  <- 5
-#' At_len      <- 3
+#' At_lens     <- rep(3, num_treats)
 #'
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' Data <- generate_dataset_uvt(n, num_treats, At_len)
+#' Data <- generate_dataset_uvt(n, num_treats, At_lens)
 #'
-generate_dataset_uvt <- function(n = 5000, num_treats = 5, At_len = 3) {
+generate_dataset_uvt <- function(n, num_treats, At_lens) {
     library(mvtnorm)
+
+    stopifnot("At_lens length must equal num_treats" = length(force(At_lens)) == num_treats)
 
     p_list      <- rep(1, num_treats)
 
@@ -30,7 +32,7 @@ generate_dataset_uvt <- function(n = 5000, num_treats = 5, At_len = 3) {
     x_i1 <- matrix(rt(n * p_list[1], df = 10), nrow = n, ncol = p_list[1])
 
     # Step 2
-    A <- matrix(sample(1:At_len, n*num_treats, replace = TRUE), nrow = n, ncol = num_treats)
+    A <- sapply(At_lens, function(a_max) sample(a_max, n, replace = TRUE))
 
     # Step 3
     X <- vector(mode = 'list', length = num_treats) # Preallocate

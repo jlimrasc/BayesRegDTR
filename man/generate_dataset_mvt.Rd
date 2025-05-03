@@ -4,7 +4,7 @@
 \alias{generate_dataset_mvt}
 \title{Generate Multivariate dataset}
 \usage{
-generate_dataset_mvt(n, num_treats, p_list, At_len)
+generate_dataset_mvt(n, num_treats, p_list, At_lens)
 }
 \arguments{
 \item{n}{Number of samples to generate}
@@ -13,7 +13,7 @@ generate_dataset_mvt(n, num_treats, p_list, At_len)
 
 \item{p_list}{Vector of dimension for each stage}
 
-\item{At_len}{Vector of number of treatment options at each stage}
+\item{At_lens}{Vector of number of treatment options at each stage}
 }
 \value{
 Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
@@ -30,10 +30,10 @@ Generate Multivariate dataset
 n           <- 5000
 num_treats  <- 3
 p_list      <- rep(2, num_treats)
-At_len      <- 3
+At_lens     <- rep(3, num_treats)
 
 # -----------------------------
 # Main
 # -----------------------------
-Data        <- generate_dataset_mvt(n, num_treats, p_list, At_len)
+Data        <- generate_dataset_mvt(n, num_treats, p_list, At_lens)
 }

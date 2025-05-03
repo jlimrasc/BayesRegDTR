@@ -27,8 +27,8 @@
 #' # -----------------------------
 #' n           <- 500
 #' num_treats  <- 5
-#' At_len      <- 3
-#' Data <- generate_dataset_uvt(n, num_treats, At_len)
+#' At_lens     <- rep(3, num_treats)
+#' Data <- generate_dataset_uvt(n, num_treats, At_lens)
 #'
 #' # -----------------------------
 #' # Main
@@ -73,7 +73,7 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
     for (t in 2:T) {
         tic(paste(t, "summary"))
         # Compute summary stats
-        Zt          <- compute_Zt(A, At_len, X, t, n, p_list)
+        Zt          <- compute_Zt(A, At_lens, X, t, n, p_list)
         thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
         omegat      <- compute_omegat(Zt, tau)
         omegat_inv  <- solve(omegat)
@@ -95,7 +95,7 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
     }
 
     tic(paste(T+1, "summary"))
-    ZT1         <- compute_Zt(A, At_len, X, T+1, n, p_list)
+    ZT1         <- compute_Zt(A, At_lens, X, T+1, n, p_list)
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)
