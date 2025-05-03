@@ -55,7 +55,6 @@ GiveChoiceValue <- function(Wt, Sigmat, bet, sigmay2, t, numTreats, histDat, cur
         for (a in 1:At_lens[t]) {
             X_ta[[a]] <- rep(0, R) # Preallocate
             A_t     <- cbind(histDatA, a)
-            # browser()
 
             for (r in 1:R){
 
@@ -79,8 +78,6 @@ GiveChoiceValue <- function(Wt, Sigmat, bet, sigmay2, t, numTreats, histDat, cur
                     )
 
             }
-            # rand_MVN <- rmvnorm(At_lens[t], sigma = Sigmat[[t+1]])
-            # x_t1ra_l <- mapply(function(x, rmvn) x+rmvn, x_t1ra_l, split(rand_MVN, rows(rand_MVN)))
         }
     }
     return(sapply(X_ta, mean))
