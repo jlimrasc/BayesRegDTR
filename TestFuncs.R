@@ -37,33 +37,75 @@
 # res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, At_lens = At_lens, B = 10000,
 #                                 alph = 3, gam = 4, p_list = rep(1, num_treats))
 
+vec_permutations <- function(max_vals) {
+    # Create a list of sequences for each position
+    ranges <- lapply(max_vals, function(x) 1:x)
+
+    # Use expand.grid to generate all combinations
+    perms <- expand.grid(rev(ranges))
+
+    # Reverse columns back to original order
+    perms <- perms[, rev(seq_along(perms))]
+
+    # Convert to matrix or leave as data frame
+    perms <- as.matrix(perms)
+    dimnames(perms) <- NULL
+
+    return(perms)
+}
 
 # GCV
 set.seed(1)
 numTreats   <- 3
 p_list      <- rep(2, numTreats)
 At_lens     <- rep(2, numTreats)
-n           <- 501
+n           <- 1000
 
 Dat <- generate_dataset_mvt(n, numTreats, p_list, At_lens)
 
 tau     <- 0.01
-B       <- 5
+B       <- 1000
 alph    <- 3
 gam     <- 4
 nu0     <- 3
 
-res_GCV <- compute_MC_draws_mvt(Data = Dat, tau = tau, At_lens = At_lens, B = B,
+Dat_to_500 <- c(list(Dat[[1]][1:500]), lapply(Dat[-1], function(x) x[1:500,]))
+res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, At_lens = At_lens, B = B,
                                 nu0 = nu0, alph = alph, gam = gam, p_list = p_list)
 
-# histDat <- c(lapply(Dat[2:(numTreats)], function(x) x[,-p_list[1]]), list(Dat[[numTreats+1]][,-p_list[1]]))
-# currDat <- lapply(Dat[2:(numTreats)], function(x) x[,p_list[1]])
-histDat <- list(Dat[[2]][501,,drop = FALSE], Dat[[5]][501,1,drop = FALSE])
-currDat <- Dat[[3]][501,,drop = FALSE]
-Wt      <- lapply(res_GCV$Wt_B_list, function(x) x[[B]])
-Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[B]])
-R       <- 30
-res_GCV2<- GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,B],
-                           sigmay = res_GCV$sigmay_2B[B], t = 2, numTreats = numTreats,
-                           histDat = histDat, currDat = currDat, R = R,
-                           At_lens = At_lens)
+source("~/GitHub/BayesRegDTR/R/GiveChoiceValue.R")
+
+tic("i = 501:n")
+res_GCV2 <- matrix(0, nrow = 500, ncol = 2)
+for (i in 501:n) {
+    if (i%%10 == 0) print(i)
+    histDat <- list(Dat[[2]][i,,drop = FALSE], Dat[[5]][i,1,drop = FALSE])
+    currDat <- Dat[[3]][i,,drop = FALSE]
+    Wt      <- lapply(res_GCV$Wt_B_list, function(x) x[[B]])
+    Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[B]])
+    R       <- 30
+
+    res_GCV2[i-500,] <-
+        GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,B],
+                        sigmay = res_GCV$sigmay_2B[B], t = 2, numTreats = numTreats,
+                        histDat = histDat, currDat = currDat, R = R,
+                        At_lens = At_lens)
+}
+toc(log = TRUE)
+
+tic("b = 1:B")
+res_GCV3 <- matrix(0, nrow = B, ncol = 2)
+for (b in 1:B) {
+    if (b%%100 == 0) print(b)
+    histDat <- list(Dat[[2]][501,,drop = FALSE], Dat[[5]][501,1,drop = FALSE])
+    currDat <- Dat[[3]][501,,drop = FALSE]
+    Wt      <- lapply(res_GCV$Wt_B_list, function(x) x[[b]])
+    Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[b]])
+    R       <- 30
+
+    res_GCV3[b,] <- GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,b],
+                                    sigmay = res_GCV$sigmay_2B[b], t = 2, numTreats = numTreats,
+                                    histDat = histDat, currDat = currDat, R = R,
+                                    At_lens = At_lens)
+}
+toc(log = TRUE)
