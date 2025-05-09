@@ -91,6 +91,8 @@ for (i in 501:n) {
                         histDat = histDat, currDat = currDat, R = R,
                         At_lens = At_lens)
 }
+res_GCV2 <- cbind(res_GCV2,0)
+res_GCV2[,3] <- apply(res_GCV2[,1:2], 1, which.max)
 toc(log = TRUE)
 
 tic("b = 1:B")
@@ -103,9 +105,14 @@ for (b in 1:B) {
     Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[b]])
     R       <- 30
 
-    res_GCV3[b,] <- GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,b],
-                                    sigmay = res_GCV$sigmay_2B[b], t = 2, numTreats = numTreats,
-                                    histDat = histDat, currDat = currDat, R = R,
-                                    At_lens = At_lens)
+    res_GCV3[b,] <-
+        GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,b],
+                        sigmay = res_GCV$sigmay_2B[b], t = 2, numTreats = numTreats,
+                        histDat = histDat, currDat = currDat, R = R,
+                        At_lens = At_lens)
 }
+res_GCV3 <- cbind(res_GCV3,0)
+res_GCV3[,3] <- apply(res_GCV3[,1:2], 1, which.max)
 toc(log = TRUE)
+
+
