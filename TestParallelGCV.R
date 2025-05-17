@@ -26,10 +26,21 @@ inner_b_GCV <- function(i) {
 }
 # res_GCV3[,3] <- apply(res_GCV3[,1:2], 1, which.max)
 
-fori <- 20
+fori <- n
 tic("b = 1:B")
-result <- foreach(i=1:fori, .inorder = TRUE, .packages = "mvtnorm") %dopar% inner_b_GCV(i)
+result <- foreach(i=501:fori, .inorder = TRUE, .packages = "mvtnorm") %dopar% inner_b_GCV(i)
 toc(log = TRUE)
 
-result <- array(unlist(result), dim = c(B, p_list[1], fori))
+result <- array(unlist(result), dim = c(B, p_list[1], (fori - 500)))
 
+# result <- array(result, dim = c(B, p_list[1], (fori-500)))
+
+# res_GCV3 <- cbind(res_GCV3,0)
+# res_GCV3[,3] <- apply(res_GCV3[,1:2], 1, which.max)
+freqs <- matrix(0, ncol = 2, nrow = 500)
+for (i in 1:500){
+         temp <- apply(result[,1:2,i], 1, which.max)
+         freqs[i,1] <- sum(temp==1)
+         freqs[i,2] <- sum(temp==2)
+}
+all(apply(freqs, 1, sum)==1000)
