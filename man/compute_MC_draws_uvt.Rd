@@ -4,16 +4,15 @@
 \alias{compute_MC_draws_uvt}
 \title{Compute Monte Carlo Draws from Univariate Dataset}
 \usage{
-compute_MC_draws_uvt(Data, tau, At_lens, B, alph, gam, p_list)
+compute_MC_draws_uvt(Data, tau, num_treats, B, alph, gam, p_list)
 }
 \arguments{
 \item{Data}{Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
-X is a list of matrices of the intermediate covariates
-and A is a matrix of the assigned treatments}
+X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments}
 
 \item{tau}{Prior precision scale. Should be specified with a small value}
 
-\item{At_lens}{Vector of number of treatment options at each stage}
+\item{num_treats}{Vector of number of treatment options at each stage}
 
 \item{B}{Number of MC draws}
 
@@ -25,8 +24,8 @@ and A is a matrix of the assigned treatments}
 }
 \value{
 Monte Carlo draws??? A list containing:  \enumerate{
-\item thetat_B_list: Desc. A list of length T with each element a vector of length B
-\item sigmat_2B_list: Desc. A list of length T with each element a vector of length B
+\item thetat_B_list: Desc. A list of length num_stages with each element a vector of length B
+\item sigmat_2B_list: Desc. A list of length num_stages with each element a vector of length B
 \item beta_B: Desc. A list of length B
 \item sigmay_2B: Desc. A list of length B
 }
@@ -39,12 +38,12 @@ Obtain Monte Carlo draws from posterior distribution of stagewise regression par
 # Initialise Inputs
 # -----------------------------
 n           <- 500
-num_treats  <- 5
-At_lens     <- rep(3, num_treats)
-Data <- generate_dataset_uvt(n, num_treats, At_lens)
+num_stages  <- 5
+num_treats     <- rep(3, num_stages)
+Data <- generate_dataset_uvt(n, num_stages, num_treats)
 
 # -----------------------------
 # Main
 # -----------------------------
-res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, T))
+res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, num_stages))
 }

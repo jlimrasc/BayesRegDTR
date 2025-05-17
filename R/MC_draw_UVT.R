@@ -3,19 +3,18 @@
 #' @description
 #' Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 #'
-#' @param Data      Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
-                 #' X is a list of matrices of the intermediate covariates
-                 #' and A is a matrix of the assigned treatments
-#' @param tau       Prior precision scale. Should be specified with a small value
-#' @param At_lens   Vector of number of treatment options at each stage
-#' @param B         Number of MC draws
-#' @param alph      Inverse-gamma shape
-#' @param gam       Inverse-gamma rate
-#' @param p_list    Vector of dimension for each stage IS THIS REQUIRED???????????????????????????????????????????????????????????????????????
+#' @param Data          Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+#' X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments
+#' @param tau           Prior precision scale. Should be specified with a small value
+#' @param num_treats    Vector of number of treatment options at each stage
+#' @param B             Number of MC draws
+#' @param alph          Inverse-gamma shape
+#' @param gam           Inverse-gamma rate
+#' @param p_list        Vector of dimension for each stage IS THIS REQUIRED???????????????????????????????????????????????????????????????????????
 #'
 #' @returns Monte Carlo draws??? A list containing:  \enumerate{
-#'              \item thetat_B_list: Desc. A list of length T with each element a vector of length B
-#'              \item sigmat_2B_list: Desc. A list of length T with each element a vector of length B
+#'              \item thetat_B_list: Desc. A list of length num_stages with each element a vector of length B
+#'              \item sigmat_2B_list: Desc. A list of length num_stages with each element a vector of length B
 #'              \item beta_B: Desc. A list of length B
 #'              \item sigmay_2B: Desc. A list of length B
 #'              }
@@ -26,18 +25,17 @@
 #' # Initialise Inputs
 #' # -----------------------------
 #' n           <- 500
-#' num_treats  <- 5
-#' At_lens     <- rep(3, num_treats)
-#' Data <- generate_dataset_uvt(n, num_treats, At_lens)
+#' num_stages  <- 5
+#' num_treats     <- rep(3, num_stages)
+#' Data <- generate_dataset_uvt(n, num_stages, num_treats)
 #'
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, At_lens = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, T))
-compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
-    library(mvtnorm)
+#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, num_stages))
+compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list) {
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
-        t(rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
+        t(mvtnorm::rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
              df = n+2*alph,
              delta = mt,
              type = "shifted")) # Draw all B at once
@@ -62,17 +60,17 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
         return(draw_sigmat_2B(beta_b, ZT1, y, tau, alph, gam, n))
     }
 
-    T <- length(Data) - 2
-    X <- Data[2:(T+1)]
+    num_stages <- length(Data) - 2
+    X <- Data[2:(num_stages+1)]
     y <- Data[[1]]
-    A <- Data[[T+2]]
+    A <- Data[[num_stages+2]]
     n <- nrow(X[[1]])
 
-    thetat_B_list  <- vector(mode = "list", length = T)
-    sigmat_2B_list <- vector(mode = "list", length = T)
-    for (t in 2:T) {
+    thetat_B_list  <- vector(mode = "list", length = num_stages)
+    sigmat_2B_list <- vector(mode = "list", length = num_stages)
+    for (t in 2:num_stages) {
         # Compute summary stats
-        Zt          <- compute_Zt(A, At_lens, X, t, n, p_list)
+        Zt          <- compute_Zt(A, num_treats, X, t, n, p_list)
         thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
         omegat      <- compute_omegat(Zt, tau)
         omegat_inv  <- solve(omegat)
@@ -88,7 +86,7 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
         sigmat_2B_list[[t]] <- sigmat_2B
     }
 
-    ZT1         <- compute_Zt(A, At_lens, X, T+1, n, p_list)
+    ZT1         <- compute_Zt(A, num_treats, X, num_stages+1, n, p_list)
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)

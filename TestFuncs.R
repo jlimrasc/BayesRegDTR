@@ -5,13 +5,13 @@
 # n           <- 5000
 # num_treats  <- 3
 # p_list      <- rep(2, num_treats)
-# At_lens     <- rep(3, num_treats)
+# num_treats  <- rep(3, num_treats)
 #
-# Data <- generate_dataset_mvt(n, num_treats, p_list, At_lens)
+# Data <- generate_dataset_mvt(n, num_treats, p_list, num_treats)
 # # X <- Data[2:(num_treats+1)]
 # # A <- Data[[num_treats+2]]
 # # y <- Data[[1]]
-# res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3,
+# res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3,
 #                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)
 
 
@@ -23,9 +23,9 @@
 # n           <- 100#500#0
 # num_treats  <- 2#5
 # p_list      <- rep(1, num_treats)
-# At_lens     <- rep(3, num_treats)
+# num_treats  <- rep(3, num_treats)
 #
-# Data <- generate_dataset_uvt(n, num_treats, At_lens)
+# Data <- generate_dataset_uvt(n, num_treats, num_treats)
 # X <- Data[2:(num_treats+1)]
 # A <- Data[[num_treats+2]]
 # y <- Data[[1]]
@@ -34,7 +34,7 @@
 # B <- 10000
 # alph <- 3
 # gam <- 4
-# res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, At_lens = At_lens, B = 10000,
+# res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
 #                                 alph = 3, gam = 4, p_list = rep(1, num_treats))
 
 vec_permutations <- function(max_vals) {

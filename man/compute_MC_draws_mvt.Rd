@@ -7,9 +7,9 @@
 compute_MC_draws_mvt(
   Data,
   tau,
-  At_lens,
+  num_treats,
   B,
-  nu0,
+  nu0 = 3,
   V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
   alph,
   gam,
@@ -18,25 +18,28 @@ compute_MC_draws_mvt(
 }
 \arguments{
 \item{Data}{Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
-X is a list of matrices of the intermediate covariates
-and A is a matrix of the assigned treatments}
+X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments}
 
 \item{tau}{Prior precision scale. Should be specified with a small value}
 
-\item{At_lens}{Vector of number of treatment options at each stage}
+\item{num_treats}{Vector of number of treatment options at each stage}
 
 \item{B}{Number of MC draws}
 
-\item{nu0}{Inverse-Wishart degres of freedom}
+\item{nu0}{Inverse-Wishart degres of freedom. default: 3}
 
-\item{V0}{Inverse-Wishart scale matrix}
+\item{V0}{Inverse-Wishart scale matrix. default: diagonalisation of p_list}
+
+\item{alph}{???}
+
+\item{gam}{???}
 
 \item{p_list}{Vector of dimension for each stage}
 }
 \value{
 Monte Carlo draws??? A list containing:  \enumerate{
-\item sigmat_B_list: Desc. A list of length T with each element a vector of size B x p_t
-\item Wt_B_list: Desc. A list of length T with each element a matrix of size B x p_t
+\item sigmat_B_list: Desc. A list of length num_stages with each element a vector of size B x p_t
+\item Wt_B_list: Desc. A list of length num_stages with each element a matrix of size B x p_t
 \item beta_B: Desc. A list of length B
 \item sigmay_2B: Desc. A list of length B
 }
@@ -49,13 +52,13 @@ Obtain Monte Carlo draws from posterior distribution of stagewise regression par
 # Initialise Inputs
 # -----------------------------
 n           <- 5000
-num_treats  <- 3
-p_list      <- rep(2, num_treats)
-At_lens     <- rep(3, num_treats)
-Data        <- generate_dataset_mvt(n, num_treats, p_list, At_lens)
+num_stages  <- 3
+p_list      <- rep(2, num_stages)
+num_treats  <- rep(3, num_stages)
+Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
 
 # -----------------------------
 # Main
 # -----------------------------
-res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
 }

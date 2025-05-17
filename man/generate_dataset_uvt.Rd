@@ -4,14 +4,14 @@
 \alias{generate_dataset_uvt}
 \title{Generate Univariate Dataset}
 \usage{
-generate_dataset_uvt(n, num_treats, At_lens)
+generate_dataset_uvt(n, num_stages, num_treats)
 }
 \arguments{
-\item{n}{Number of samples to generate}
+\item{n}{Number of samples/individuals to generate}
 
-\item{num_treats}{Total number of stages per sample}
+\item{num_stages}{Total number of stages per individual}
 
-\item{At_lens}{Vector of number of treatment options at each stage}
+\item{num_treats}{Vector of number of treatment options at each stage}
 }
 \value{
 Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
@@ -26,12 +26,12 @@ Generate Univariate Dataset
 # Initialise Inputs
 # -----------------------------
 n           <- 500
-num_treats  <- 5
-At_lens     <- rep(3, num_treats)
+num_stages  <- 5
+num_treats  <- rep(3, num_stages)
 
 # -----------------------------
 # Main
 # -----------------------------
-Data <- generate_dataset_uvt(n, num_treats, At_lens)
+Data <- generate_dataset_uvt(n, num_stages, num_treats)
 
 }

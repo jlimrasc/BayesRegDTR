@@ -23,7 +23,6 @@ compute_Zt <- function(A, At_lens, X, t, n, p_list) {
 
     # Calculate permutations of a1, ..., an
     perms <- vec_permutations(At_lens[1:(t-1)])
-    # browser()
 
     # Preallocate Zt
     Zt <- matrix(0, nrow = n, ncol = p_sum * nrow(perms))
