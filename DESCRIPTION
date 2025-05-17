@@ -17,7 +17,9 @@ Imports:
     mvtnorm, 
     MixMatrix, 
     expm, 
-    VBel
+    foreach
+Depends:
+    doParallel
 LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

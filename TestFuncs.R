@@ -37,44 +37,52 @@
 # res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
 #                                 alph = 3, gam = 4, p_list = rep(1, num_treats))
 
-vec_permutations <- function(max_vals) {
-    # Create a list of sequences for each position
-    ranges <- lapply(max_vals, function(x) 1:x)
-
-    # Use expand.grid to generate all combinations
-    perms <- expand.grid(rev(ranges))
-
-    # Reverse columns back to original order
-    perms <- perms[, rev(seq_along(perms))]
-
-    # Convert to matrix or leave as data frame
-    perms <- as.matrix(perms)
-    dimnames(perms) <- NULL
-
-    return(perms)
-}
+# vec_permutations <- function(max_vals) {
+#     # Create a list of sequences for each position
+#     ranges <- lapply(max_vals, function(x) 1:x)
+#
+#     # Use expand.grid to generate all combinations
+#     perms <- expand.grid(rev(ranges))
+#
+#     # Reverse columns back to original order
+#     perms <- perms[, rev(seq_along(perms))]
+#
+#     # Convert to matrix or leave as data frame
+#     perms <- as.matrix(perms)
+#     dimnames(perms) <- NULL
+#
+#     return(perms)
+# }
 
 # GCV
 set.seed(1)
-numTreats   <- 3
-p_list      <- rep(2, numTreats)
-At_lens     <- rep(2, numTreats)
+num_stages  <- 3
+t           <- 2
+p_list      <- rep(2, num_stages)
+num_treats  <- rep(2, num_stages)
 n           <- 1000
+n.train     <- 500
 
-Dat <- generate_dataset_mvt(n, numTreats, p_list, At_lens)
+Dat <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
 
 tau     <- 0.01
-B       <- 1000
+B       <- 5
 alph    <- 3
 gam     <- 4
 nu0     <- 3
+V0      <- mapply(diag, p_list, SIMPLIFY = FALSE)
+R       <- 30
+numCores<- parallel::detectCores()
 
-Dat_to_500 <- c(list(Dat[[1]][1:500]), lapply(Dat[-1], function(x) x[1:500,]))
-res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, At_lens = At_lens, B = B,
-                                nu0 = nu0, alph = alph, gam = gam, p_list = p_list)
+gcv_res <- testParallelGCV(Dat, n, n.train, num_stages, num_treats, p_list, t, R, numCores,
+                           tau, B, nu0, V0, alph, gam)
+
+# Dat_to_500 <- c(list(Dat[[1]][1:500]), lapply(Dat[-1], function(x) x[1:500,]))
+# res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, num_treats = num_treats, B = B,
+#                                 nu0 = nu0, alph = alph, gam = gam, p_list = p_list)
 
 # source("~/GitHub/BayesRegDTR/R/GiveChoiceValue.R")
-# 
+#
 # tic("i = 501:n")
 # res_GCV2 <- matrix(0, nrow = 500, ncol = 3)
 # for (i in 501:n) {
@@ -84,17 +92,18 @@ res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, At_lens = At_lens,
 #     Wt      <- lapply(res_GCV$Wt_B_list, function(x) x[[B]])
 #     Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[B]])
 #     R       <- 30
-# 
+#
 #     res_GCV2[i-500,] <-
 #         GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,B],
-#                         sigmay = res_GCV$sigmay_2B[B], t = 2, numTreats = numTreats,
+#                         sigmay = res_GCV$sigmay_2B[B], t = 2,
+#                         num_stages = num_stages, p_list = p_list
 #                         histDat = histDat, currDat = currDat, R = R,
-#                         At_lens = At_lens)
+#                         num_treats = num_treats)
 # }
 # res_GCV2 <- cbind(res_GCV2,0)
 # res_GCV2[,3] <- apply(res_GCV2[,1:2], 1, which.max)
 # toc(log = TRUE)
-# 
+#
 # tic("b = 1:B")
 # res_GCV3 <- matrix(0, nrow = B, ncol = 3)
 # for (b in 1:B) {
@@ -104,15 +113,16 @@ res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, At_lens = At_lens,
 #     Wt      <- lapply(res_GCV$Wt_B_list, function(x) x[[b]])
 #     Sigmat  <- lapply(res_GCV$sigmat_B_list, function(x) x[[b]])
 #     R       <- 30
-# 
+#
 #     res_GCV3[b,] <-
 #         GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_GCV$beta_B[,b],
-#                         sigmay = res_GCV$sigmay_2B[b], t = 2, numTreats = numTreats,
+#                         sigmay = res_GCV$sigmay_2B[b], t = 2,
+#                         num_stages = num_stages, p_list = p_list
 #                         histDat = histDat, currDat = currDat, R = R,
-#                         At_lens = At_lens)
+#                         num_treats = num_treats)
 # }
 # res_GCV3 <- cbind(res_GCV3,0)
 # res_GCV3[,3] <- apply(res_GCV3[,1:2], 1, which.max)
 # toc(log = TRUE)
-# 
-# 
+#
+#
