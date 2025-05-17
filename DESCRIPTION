@@ -17,8 +17,7 @@ Imports:
     mvtnorm, 
     MixMatrix, 
     expm, 
-    VBel,
-    tictoc
+    VBel
 LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

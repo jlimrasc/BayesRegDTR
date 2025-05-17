@@ -9,8 +9,8 @@
 #' @param tau       Prior precision scale. Should be specified with a small value
 #' @param At_lens   Vector of number of treatment options at each stage
 #' @param B         Number of MC draws
-#' @param nu0       Inverse-Wishart degres of freedom
-#' @param V0        Inverse-Wishart scale matrix
+#' @param nu0       Inverse-Wishart degres of freedom. default: 3
+#' @param V0        Inverse-Wishart scale matrix. default: diagonalisation of p_list
 #' @param p_list    Vector of dimension for each stage
 #'
 #' @returns Monte Carlo draws??? A list containing:  \enumerate{
@@ -37,13 +37,9 @@
 #' # Main
 #' # -----------------------------
 #' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, At_lens = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
-compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
+compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0 = 3,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  alph, gam, p_list ) {
-    library(mvtnorm)
-    library(MixMatrix)
-    library(tictoc)
-    library(expm)
     draw_sigmat_B <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
         temp_rwish <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
@@ -108,13 +104,9 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
         Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
 
         # Draw
-        tic(paste('t =', t, 'sigmat_B: '))
         sigmat_B <- draw_sigmat_B(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
-        toc(log = TRUE)
 
-        tic(paste('t =', t, 'Wtb: '))
         Wt_B <- draw_Wt_B_cpp(omegat_inv, Mnt, tau, sigmat_B, p_list[t], ncol(Zt), B)
-        toc(log = TRUE)
 
 
         # Store
@@ -122,21 +114,15 @@ compute_MC_draws_mvt <- function(Data, tau, At_lens, B, nu0,
         Wt_B_list[[t]] <- Wt_B
     }
 
-    tic(paste(T+1, "summary"))
     ZT1         <- compute_Zt(A, At_lens, X, T+1, n, p_list)
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)
     cT1         <- compute_ct(ZT1, y, omegaT1_inv, n)
     mT1         <- compute_mt(ZT1, thetaT1_hat, omegaT1_inv)
-    toc()
 
-    tic('thetat_b')
     beta_B <- draw_beta_B(cT1, mT1, omegaT1_inv, B, alph, gam, n)
-    toc()
-    tic('sigmat_2b')
     sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
-    toc()
 
     return(list(sigmat_B_list = sigmat_B_list[-1], Wt_B_list = Wt_B_list[-1],
                 beta_B = beta_B, sigmay_2B = sigmay_2B))

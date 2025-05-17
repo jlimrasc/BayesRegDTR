@@ -49,7 +49,6 @@ GiveChoiceValue <- function(Wt, Sigmat, bet, sigmay2, t, numTreats, histDat, cur
 
         p_sum   <- sum(p_list[1:t])
         x_t1ra_mid  <- matrix(0, nrow = n, ncol = p_sum * nrow(perms))
-        # x_t1ra_l<- vector(mode="list", length = At_len[t])
 
         X_ta    <- vector(mode = 'list', length = At_lens[t])
         for (a in 1:At_lens[t]) {

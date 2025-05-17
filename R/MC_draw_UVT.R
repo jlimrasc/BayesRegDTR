@@ -71,7 +71,6 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
     thetat_B_list  <- vector(mode = "list", length = T)
     sigmat_2B_list <- vector(mode = "list", length = T)
     for (t in 2:T) {
-        tic(paste(t, "summary"))
         # Compute summary stats
         Zt          <- compute_Zt(A, At_lens, X, t, n, p_list)
         thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
@@ -79,36 +78,25 @@ compute_MC_draws_uvt <- function(Data, tau, At_lens, B, alph, gam, p_list) {
         omegat_inv  <- solve(omegat)
         ct          <- compute_ct(Zt, X[[t]], omegat_inv, n)
         mt          <- compute_mt(Zt, thetat_hat, omegat_inv)
-        toc()
 
         # Draw
-        tic('thetat_B')
         thetat_B <- draw_thetat_B(ct, mt, omegat, B, alph, gam, n)
-        toc()
-        tic('sigmat_2B')
         sigmat_2B <- draw_sigmat_2B(thetat_B, Zt, X[[t]], tau, alph, gam, n)
-        toc()
 
         # Store
         thetat_B_list[[t]]  <- thetat_B
         sigmat_2B_list[[t]] <- sigmat_2B
     }
 
-    tic(paste(T+1, "summary"))
     ZT1         <- compute_Zt(A, At_lens, X, T+1, n, p_list)
     thetaT1_hat <- compute_thetat_hat(ZT1, y)
     omegaT1     <- compute_omegat(ZT1, tau)
     omegaT1_inv <- solve(omegaT1)
     cT1         <- compute_ct(ZT1, y, omegaT1_inv, n)
     mT1         <- compute_mt(ZT1, thetaT1_hat, omegaT1_inv)
-    toc()
 
-    tic('thetat_B')
     beta_B <- draw_beta_B(cT1, mT1, omegaT1_inv, B, alph, gam, n)
-    toc()
-    tic('sigmay_2B')
     sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
-    toc()
 
     return(list(thetat_B_list = thetat_B_list[-1], sigmat_2B_list = sigmat_2B_list[-1],
                 beta_B = beta_B, sigmay_2B = sigmay_2B))
