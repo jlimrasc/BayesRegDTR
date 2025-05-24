@@ -7,8 +7,8 @@
 #' @param p_list        Vector of dimension for each stage
 #' @param num_treats    Vector of number of treatment options at each stage
 #'
-#' @returns Observed data organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_states}, A\}} where y is a
-#' vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_states}} is a list of matrices
+#' @returns Observed data organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_stages}, A\}} where y is a
+#' vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_stages}} is a list of matrices
 #' of the intermediate covariates and A is an \eqn{n \times num\_stages}{n x num_stages} matrix of the
 #' assigned treatments
 #' @export

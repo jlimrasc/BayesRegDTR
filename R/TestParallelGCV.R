@@ -1,8 +1,8 @@
 #' Title
 #'
 #' @param Dat.train     Training data in format returned by `generate_dataset`:
-#' organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_states}, A\}} where y is a
-#' vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_states}} is a list of matrices
+#' organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_stages}, A\}} where y is a
+#' vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_stages}} is a list of matrices
 #' of the intermediate covariates and A is an \eqn{n \times num\_stages}{n x num_stages} matrix of the
 #' assigned treatments
 #' @param Dat.pred      Prediction data in format returned by `generate_dataset`:
