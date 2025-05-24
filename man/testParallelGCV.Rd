@@ -5,9 +5,10 @@
 \title{Title}
 \usage{
 testParallelGCV(
-  Dat,
-  n,
+  Dat.train,
+  Dat.pred,
   n.train,
+  n.pred,
   num_stages,
   num_treats,
   p_list,
@@ -15,50 +16,56 @@ testParallelGCV(
   R = 30,
   numCores,
   tau = 0.01,
-  B,
+  B = 10000,
   nu0 = 3,
   V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-  alph,
-  gam
+  alph = 1,
+  gam = 1
 )
 }
 \arguments{
-\item{Dat}{Data in format returned by \code{generate_dataset_mvt}:
-organised as a list of {y, X, A} where y is a vector of the final outcomes,
-X is a list of matrices of the intermediate covariates and A is a matrix of
-the assigned treatments}
+\item{Dat.train}{Training data in format returned by \code{generate_dataset}:
+organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_states}, A\}} where y is a
+vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_states}} is a list of matrices
+of the intermediate covariates and A is an \eqn{n \times num\_stages}{n x num_stages} matrix of the
+assigned treatments}
 
-\item{n}{Number of samples/individuals}
+\item{Dat.pred}{Prediction data in format returned by \code{generate_dataset}:
+organised as a list of \eqn{\{X_1, X_2..., X_t, A\}} where
+\eqn{X_1, X_2..., X_t} is a list of matrices of the intermediate
+covariates and A is an \eqn{n \times (t-1)}{n x (t-1)} matrix of the assigned treatments}
 
-\item{n.train}{Train model using MC Draws from 1:n.train}
+\item{n.train}{Number of samples/individuals in the training data}
 
-\item{num_stages}{Total number of stages per individual}
+\item{n.pred}{Number of samples/individuals in the prediction data}
+
+\item{num_stages}{Total number of stages}
 
 \item{num_treats}{Vector of number of treatment options at each stage}
 
-\item{p_list}{Vector of dimension for each stage}
+\item{p_list}{Vector of intermediate covariate dimensions for each stage}
 
 \item{t}{Prediction stage t, where \eqn{\leq}{<=} num_stages}
 
-\item{R}{Draw size. default = 30}
+\item{R}{Draw size from posterior distribution of intermediate covariates. default:  30}
 
-\item{numCores}{Number of cores in the system to use. default uses parallel::detectCores()}
+\item{numCores}{Number of cores in the system to use. default uses parallel::detectCores() - 1}
 
-\item{tau}{Prior precision scale. Should be specified with a small value. default = 0.01}
+\item{tau}{Normal prior scale parameter for regression coefficients. Should be specified with a small value. default:  0.01}
 
-\item{B}{Number of MC draws}
+\item{B}{Number of MC draws from posterior of regression parameters. default 10000}
 
-\item{nu0}{Inverse-Wishart degres of freedom. default: 3}
+\item{nu0}{Inverse-Wishart prior degrees of freedom for regression error Vcov matrix. default: 3}
 
-\item{V0}{Inverse-Wishart scale matrix. default: diagonalisation of p_list}
+\item{V0}{List of Inverse-Wishart prior scale matrix for regression error Vcov matrix. default: list of identity matrices}
 
-\item{alph}{???}
+\item{alph}{Inverse-Gamma prior shape parameter for regression error variance of y. default:  1}
 
-\item{gam}{???}
+\item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
 }
 \value{
 list of {GCV_results, freqs} where GCV_results is an array of size
-n-n.train x p_list\link{t} x B, and freqs is a n-n.train x p_list\link{t} matrix
+n.pred x p_list[t] x B, and freqs is a n.pred x p_list[t] matrix
 of the frequency of each treatment type at stage t
 }
 \description{
@@ -71,11 +78,11 @@ Title
 num_stages  <- 3
 p_list      <- rep(2, num_stages)
 num_treats  <- rep(2, num_stages)
-n           <- 1000
-n.train     <- 500
+n.train     <- 5000
+n.pred      <- 100
 
 tau     <- 0.01
-B       <- 5
+B       <- 100
 alph    <- 3
 gam     <- 4
 nu0     <- 3
@@ -86,11 +93,13 @@ numCores<- parallel::detectCores()
 # -----------------------------
 # Generate Dataset
 # -----------------------------
-Dat <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
+Dat.train <- generate_dataset_mvt(n.train, num_stages, p_list, num_treats)
+Dat.pred  <- generate_dataset_mvt(n.pred,  num_stages, p_list, num_treats)
+Dat.pred  <- Dat.pred[-1]
+Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
 
 # -----------------------------
 # Main
 # -----------------------------
-gcv_res <- TestParallelGCV(Dat, n, n.train, num_stages, p_list, t, R, numCores,
-                           tau, B, nu0, V0, alph, gam)
+gcv_res <- testParallelGCV(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats, p_list, t)
 }

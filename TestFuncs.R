@@ -1,41 +1,41 @@
-# # MVT
-# set.seed(1) #remove later
-#
-# # Starting Scalar values
-# n           <- 5000
-# num_treats  <- 3
-# p_list      <- rep(2, num_treats)
-# num_treats  <- rep(3, num_treats)
-#
-# Data <- generate_dataset_mvt(n, num_treats, p_list, num_treats)
-# # X <- Data[2:(num_treats+1)]
-# # A <- Data[[num_treats+2]]
-# # y <- Data[[1]]
-# res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3,
-#                              V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+# MVT
+set.seed(1) #remove later
+
+# Starting Scalar values
+n           <- 5000
+num_stages  <- 4
+p_list      <- c(2, 2, rep(1, num_stages-2))
+num_treats  <- rep(3, num_stages)
+
+Data <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
+# X <- Data[2:(num_stages+1)]
+# A <- Data[[num_stages+2]]
+# y <- Data[[1]]
+res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 100, nu0 = 3,
+                             V0 = mapply(diag, p_list, SIMPLIFY = FALSE), alph = 3, gam = 4, p_list = p_list)
 
 
 
-# # UVT
-# set.seed(1) #remove later
-#
-# # Starting Scalar values
-# n           <- 100#500#0
-# num_treats  <- 2#5
-# p_list      <- rep(1, num_treats)
-# num_treats  <- rep(3, num_treats)
-#
-# Data <- generate_dataset_uvt(n, num_treats, num_treats)
-# X <- Data[2:(num_treats+1)]
-# A <- Data[[num_treats+2]]
+# UVT
+set.seed(1) #remove later
+
+# Starting Scalar values
+n           <- 100#500#0
+num_stages  <- 2#5
+p_list      <- rep(1, num_stages)
+num_treats  <- rep(3, num_stages)
+
+Data <- generate_dataset_uvt(n, num_stages, num_treats)
+# X <- Data[2:(num_stages+1)]
+# A <- Data[[num_stages+2]]
 # y <- Data[[1]]
 #
-# tau <- 0.01
-# B <- 10000
-# alph <- 3
-# gam <- 4
-# res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
-#                                 alph = 3, gam = 4, p_list = rep(1, num_treats))
+tau <- 0.01
+B <- 10000
+alph <- 3
+gam <- 4
+res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
+                                alph = 3, gam = 4, p_list = rep(1, num_stages))
 
 # vec_permutations <- function(max_vals) {
 #     # Create a list of sequences for each position
@@ -60,22 +60,26 @@ num_stages  <- 3
 t           <- 2
 p_list      <- rep(2, num_stages)
 num_treats  <- rep(2, num_stages)
-n           <- 1000
 n.train     <- 500
+n.pred      <- 100
 
-Dat <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
+Dat.train <- generate_dataset_mvt(n.train, num_stages, p_list, num_treats)
+Dat.pred  <- generate_dataset_mvt(n.pred,  num_stages, p_list, num_treats)
+Dat.pred  <- Dat.pred[-1]
+Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
 
-tau     <- 0.01
-B       <- 5
-alph    <- 3
-gam     <- 4
-nu0     <- 3
-V0      <- mapply(diag, p_list, SIMPLIFY = FALSE)
-R       <- 30
-numCores<- parallel::detectCores()
+# tau     <- 0.01
+# B       <- 5
+# alph    <- 3
+# gam     <- 4
+# nu0     <- 3
+# V0      <- mapply(diag, p_list, SIMPLIFY = FALSE)
+# R       <- 30
+# numCores<- parallel::detectCores()
 
-gcv_res <- testParallelGCV(Dat, n, n.train, num_stages, num_treats, p_list, t, R, numCores,
-                           tau, B, nu0, V0, alph, gam)
+gcv_res <- testParallelGCV(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats, p_list, t)
+# , R, numCores,
+#                            tau, B, nu0, V0, alph, gam)
 
 # Dat_to_500 <- c(list(Dat[[1]][1:500]), lapply(Dat[-1], function(x) x[1:500,]))
 # res_GCV <- compute_MC_draws_mvt(Data = Dat_to_500, tau = tau, num_treats = num_treats, B = B,
