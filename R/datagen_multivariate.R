@@ -54,11 +54,11 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
         }
 
         X[[t]] <- mvtnorm::rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-            t(unname(mapply(FUN = gen_xit,
+            matrix(mapply(FUN = gen_xit,
                      split(X[[t-1]], row(X[[t-1]])),
                      split(A[,t-1] == 2, 1:n),
                      split(A[,t-1] == 3, 1:n),
-                     t = t)))
+                     t = t, USE.NAMES = FALSE), ncol = p_list[t])
     }
 
     if (num_stages > 2) {
@@ -70,12 +70,12 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
             A3 * (-t * C %*% X_it1 + sqrt(t-1) * C2 %*% X_it2) # Elif a==3
         }
         X[[t]] <- mvtnorm::rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-            t(unname(mapply(FUN = gen_xit,
+            matrix(mapply(FUN = gen_xit,
                      split(X[[t-1]], row(X[[t-1]])),
                      split(X[[t-2]], row(X[[t-2]])),
                      split(A[,t-1] == 2, 1:n),
                      split(A[,t-1] == 3, 1:n),
-                     t = t)))
+                     t = t), ncol = p_list[t])
     }
 
     if (num_stages > 3) {
@@ -91,13 +91,13 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
             }
 
             X[[t]] <- mvtnorm::rmvnorm(n, sigma = diag(0.5^2, p_list[t]), mean = rep(0, p_list[t])) +
-                t(unname(mapply(FUN = gen_xit,
+                matrix(mapply(FUN = gen_xit,
                          split(X[[t-1]], row(X[[t-1]])),
                          split(X[[t-2]], row(X[[t-2]])),
                          split(X[[t-3]], row(X[[t-3]])),
                          split(A[,t-1] == 2, 1:n),
                          split(A[,t-1] == 3, 1:n),
-                         t = t)))
+                         t = t), ncol = p_list[t])
         }
     }
 
