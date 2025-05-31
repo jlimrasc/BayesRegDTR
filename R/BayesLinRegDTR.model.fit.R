@@ -24,13 +24,13 @@
 #' @param numCores      Number of cores in the system to use. default uses parallel::detectCores() - 1
 #' @param tau           Normal prior scale parameter for regression coefficients. Should be specified with a small value. default:  0.01
 #' @param B             Number of MC draws from posterior of regression parameters. default 10000
-#' @param nu0           Inverse-Wishart prior degrees of freedom for regression error Vcov matrix. default: 3
-#' @param V0            List of Inverse-Wishart prior scale matrix for regression error Vcov matrix. default: list of identity matrices
+#' @param nu0           Inverse-Wishart prior degrees of freedom for regression error Vcov matrix. Ignored if using a univariate dataset. default: 3
+#' @param V0            List of Inverse-Wishart prior scale matrix for regression error Vcov matrix. Ignored if using a univariate dataset. default: list of identity matrices
 #' @param alph          Inverse-Gamma prior shape parameter for regression error variance of y. default:  1
 #' @param gam           Inverse-Gamma prior rate parameter for regression error variance of y. default:  1
 #'
 #' @returns GCV_results is an array of dimension
-        #' \eqn{n.pred \times p_list\[t\] x B}{n.pred x p_list\[t\] x B},
+        #' \eqn{n.pred \times num_treats\[t\] x B}{n.pred x num_treats\[t\] x B},
         #' indicating the expected value under each treatment option at stage t.
         #' Uses backward induction and dynamic programming theory for computing
         #' expected values.
@@ -86,17 +86,24 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
     stopifnot("t must be less than or equal to num_stages" = t <= num_stages)
 
     # Retrieve training data and train model
+    if (any(p_list > 1))
     # Dat.train <- c(list(Dat[[1]][1:n.train]), lapply(Dat[-1], function(x) x[1:n.train,]))
-    res_mc <- compute_MC_draws_mvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
-                                    nu0 = nu0, V0 = V0, alph = alph, gam = gam, p_list = p_list)
+        res_mc <- compute_MC_draws_mvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
+                                        nu0 = nu0, V0 = V0, alph = alph, gam = gam, p_list = p_list)
+    else
+        res_mc <- compute_MC_draws_uvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
+                                       alph = alph, gam = gam, p_list = p_list)
+    res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
+                                    alph = 3, gam = 4, p_list = rep(1, num_stages))
 
     # Set up parallel processing
     if (missing(numCores)) numCores <- parallel::detectCores() - 1
     doParallel::registerDoParallel(numCores)  # use multicore, set to the number of our cores
 
     # Inner loop
-    inner_b_GCV <- function(i, p_t, p_list) {
-        res_GCV_1B <- matrix(0, nrow = B, ncol = p_t)
+    # MVT Version
+    inner_b_GCV_MVT <- function(i, ntreats_t, p_list) {
+        res_GCV_1B <- matrix(0, nrow = B, ncol = ntreats_t)
         for (b in 1:B) {
             # histDat <- c(lapply(Dat[2:t], function(x) x[i,,drop = FALSE]), list(Dat[[num_stages + 2]][i,1,drop = FALSE]))
             # currDat <- Dat[[t]][i,,drop = FALSE]
@@ -115,18 +122,41 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
         return(res_GCV_1B)
     }
 
+    # UVT Version
+    inner_b_GCV_UVT <- function(i, ntreats_t, p_list) {
+        res_GCV_1B <- matrix(0, nrow = B, ncol = ntreats_t)
+        for (b in 1:B) {
+            histDat <- c(lapply(Dat.pred[1:(t-1)], function(x) x[i,,drop = FALSE]), list(Dat.pred[[num_stages + 1]][i,1:(t-1),drop = FALSE]))
+            currDat <- Dat.pred[[t]][i,,drop = FALSE]
+            thetat  <- lapply(res_uvt$thetat_B_list, function(x) matrix(x[,b]))
+            Sigmat  <- lapply(res_uvt$sigmat_2B_list, function(x) matrix(x[b]))
+
+            res_GCV_1B[b,] <-
+                GiveChoiceValue(Wt = thetat, Sigmat = Sigmat, bet = res_mc$beta_B[,b],
+                                sigmay = res_mc$sigmay_2B[b], t = t,
+                                num_stages = num_stages, p_list = p_list,
+                                histDat = histDat, currDat = currDat, R = R,
+                                num_treats = num_treats)
+        }
+        return(res_GCV_1B)
+    }
+
     # Calculate all GCVs
-    p_t <- p_list[t]
-    res_GCV <- foreach(i=1:n.pred, .inorder = TRUE, .packages = "mvtnorm") %dopar% inner_b_GCV(i, p_t, p_list)
-    res_GCV <- array(unlist(res_GCV), dim = c(B, p_t, n.train)) # Reformat into array
+    ntreats_t <- num_treats[t]
+    if (any(p_list > 1))
+        res_GCV <- foreach(i=1:n.pred, .inorder = TRUE, .packages = "mvtnorm") %dopar% inner_b_GCV_MVT(i, ntreats_t, p_list)
+    else
+        res_GCV <- foreach(i=1:n.pred, .inorder = TRUE, .packages = "mvtnorm") %dopar% inner_b_GCV_UVT(i, ntreats_t, p_list)
+    res_GCV <- array(unlist(res_GCV), dim = c(B, ntreats_t, n.train)) # Reformat into array
 
     # Calculate frequencies
-    freqs <- matrix(0, ncol = 2, nrow = n.train)
+    freqs <- matrix(0, ncol = ntreats_t, nrow = n.train)
     for (i in 1:n.train){
              temp <- apply(res_GCV[,,i], 1, which.max)
-             freqs[i,1] <- sum(temp==1)
-             freqs[i,2] <- sum(temp==2)
+             freqs[i, 1:ntreats_t] <- tabulate(temp, nbins = ntreats_t)
     }
+             # freqs[i,1] <- sum(temp==1)
+             # freqs[i,2] <- sum(temp==2)
     # all(apply(freqs, 1, sum) == B) # No need check?
     post.prob <- freqs/B
     return(list("GCV_results" = res_GCV, "post.prob" = post.prob, "MC_draws.train", res_mc))

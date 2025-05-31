@@ -20,14 +20,32 @@ res_mvt2 <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = num_treat
 equality <- c()
 equality <- c(equality, all(unlist(Data) == unlist(Data2)), all(unlist(res_mvt) == unlist(res_mvt2)))
 
+t<-3
+b<-1
+i<-1
+Dat.pred  <- generate_dataset_mvt(n,  num_stages, p_list, num_treats)
+Dat.pred  <- Dat.pred[-1]
+Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n, 1:(t-1), drop = FALSE]
+histDat <- c(lapply(Dat.pred[1:(t-1)], function(x) x[i,,drop = FALSE]), list(Dat.pred[[num_stages + 1]][i,1:(t-1),drop = FALSE]))
+currDat <- Dat.pred[[t]][i,,drop = FALSE]
+Wt      <- lapply(res_mvt$Wt_B_list, function(x) x[[b]])
+Sigmat  <- lapply(res_mvt$sigmat_B_list, function(x) x[[b]])
+
+temp <-
+    GiveChoiceValue(Wt = Wt, Sigmat = Sigmat, bet = res_mvt$beta_B[,b],
+                    sigmay = res_mvt$sigmay_2B[b], t = t,
+                    num_stages = num_stages, p_list = p_list,
+                    histDat = histDat, currDat = currDat, R = 30,
+                    num_treats = num_treats)
+
 rm(list = setdiff(ls(), "equality"))
 
 # UVT
 set.seed(1) #remove later
 
 # Starting Scalar values
-n           <- 100#500#0
-num_stages  <- 2#5
+n           <- 5000
+num_stages  <- 5
 p_list      <- rep(1, num_stages)
 num_treats  <- rep(3, num_stages)
 
@@ -37,16 +55,34 @@ Data <- generate_dataset_uvt(n, num_stages, num_treats)
 # y <- Data[[1]]
 #
 tau <- 0.01
-B <- 10000
+B <- 100
 alph <- 3
 gam <- 4
-res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
-                                alph = 3, gam = 4, p_list = rep(1, num_stages))
+res_uvt <- compute_MC_draws_uvt(Data = Data, tau = tau, num_treats = num_treats, B = B,
+                                alph = alph, gam = gam, p_list = p_list)
 
 set.seed(1) #remove later
 Data2 <- generate_dataset(n, num_stages, p_list, num_treats)
-res_uvt2 <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
-                                alph = 3, gam = 4, p_list = rep(1, num_stages))
+res_uvt2 <- compute_MC_draws_uvt(Data = Data, tau = tau, num_treats = num_treats, B = B,
+                                alph = alph, gam = gam, p_list = p_list)
+
+t<-3
+b<-1
+i<-1
+Dat.pred  <- generate_dataset(n,  num_stages, p_list, num_treats)
+Dat.pred  <- Dat.pred[-1]
+Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n, 1:(t-1), drop = FALSE]
+histDat <- c(lapply(Dat.pred[1:(t-1)], function(x) x[i,,drop = FALSE]), list(Dat.pred[[num_stages + 1]][i,1:(t-1),drop = FALSE]))
+currDat <- Dat.pred[[t]][i,,drop = FALSE]
+thetat  <- lapply(res_uvt$thetat_B_list, function(x) matrix(x[,b]))
+Sigmat  <- lapply(res_uvt$sigmat_2B_list, function(x) matrix(x[b]))
+
+temp <-
+    GiveChoiceValue(Wt = thetat, Sigmat = Sigmat, bet = res_uvt$beta_B[,b],
+                    sigmay = res_uvt$sigmay_2B[b], t = t,
+                    num_stages = num_stages, p_list = p_list,
+                    histDat = histDat, currDat = currDat, R = 30,
+                    num_treats = num_treats)
 
 equality <- c(equality, all(unlist(Data) == unlist(Data2)), all(unlist(res_uvt) == unlist(res_uvt2)))
 rm(list = setdiff(ls(), "equality"))
