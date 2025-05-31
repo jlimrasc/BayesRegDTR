@@ -1,6 +1,6 @@
 Package: BayesRegDTR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-based Regression Method
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -9,8 +9,8 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: Methods to estimate optimal dynamic treatment regimes using Bayesian
+    likelihood-based regression approach as described in  Yu, W., & Bondell, H. D. (2023)
 License: GPL (>= 3)
 Imports: 
     Rcpp (>= 1.0.13-1), 

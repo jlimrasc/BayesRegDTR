@@ -1,21 +1,26 @@
-#' Title
+#' BayesLinRegDTR.model.fit
+#'
+#' Fits the Bayesian likelihood-based linear model to obtain an estimated posterior
+#' distribution of the optimal treatment option at a user-specified prediction stage.
+#'
 #'
 #' @param Dat.train     Training data in format returned by `generate_dataset`:
 #' organised as a list of \eqn{\{y, X_1, X_2..., X_{num\_stages}, A\}} where y is a
 #' vector of the final outcomes, \eqn{X_1, X_2..., X_{num\_stages}} is a list of matrices
-#' of the intermediate covariates and A is an \eqn{n \times num\_stages}{n x num_stages} matrix of the
-#' assigned treatments
+#' of the intermediate covariates and A is an \eqn{n.train \times num\_stages}{n.train x num_stages} matrix of the
+#' assigned treatments, where num_stages is the total number of stages
 #' @param Dat.pred      Prediction data in format returned by `generate_dataset`:
 #' organised as a list of \eqn{\{X_1, X_2..., X_t, A\}} where
 #' \eqn{X_1, X_2..., X_t} is a list of matrices of the intermediate
-#' covariates and A is an \eqn{n \times (t-1)}{n x (t-1)} matrix of the assigned treatments
+#' covariates and A is an \eqn{n.pred \times (t-1)}{n.pred x (t-1)} matrix of the assigned treatments,
+#' where t is the prediction stage
 #' @param n.train       Number of samples/individuals in the training data
 #' @param n.pred        Number of samples/individuals in the prediction data
 #' @param num_stages    Total number of stages
 #' @param num_treats    Vector of number of treatment options at each stage
 #' @param p_list        Vector of intermediate covariate dimensions for each stage
-#' @param t             Prediction stage t, where \eqn{\leq}{<=} num_stages
-#' @param R             Draw size from posterior distribution of intermediate covariates. default:  30
+#' @param t             Prediction stage t, where t \eqn{\leq}{<=} num_stages
+#' @param R             Draw size from distribution of intermediate covariates. default:  30
 #' @param numCores      Number of cores in the system to use. default uses parallel::detectCores() - 1
 #' @param tau           Normal prior scale parameter for regression coefficients. Should be specified with a small value. default:  0.01
 #' @param B             Number of MC draws from posterior of regression parameters. default 10000
@@ -24,9 +29,19 @@
 #' @param alph          Inverse-Gamma prior shape parameter for regression error variance of y. default:  1
 #' @param gam           Inverse-Gamma prior rate parameter for regression error variance of y. default:  1
 #'
-#' @returns list of {GCV_results, freqs} where GCV_results is an array of size
-        #' n.pred x p_list\[t\] x B, and freqs is a n.pred x p_list\[t\] matrix
-        #' of the frequency of each treatment type at stage t
+#' @returns GCV_results is an array of dimension
+        #' \eqn{n.pred \times p_list\[t\] x B}{n.pred x p_list\[t\] x B},
+        #' indicating the expected value under each treatment option at stage t.
+        #' Uses backward induction and dynamic programming theory for computing
+        #' expected values.
+        #' post.prob is an \eqn{n.pred \times num_treats\[t\]}{n.pred x num_treats\[t\]} matrix
+        #' of the posterior probability that each treatment type at stage t is optimal
+        #' MC_draws.train is a list of Monte Carlo draws containing:  \enumerate{
+#'              \item sigmat_B_list: Desc. A list of length num_stages with each element a vector of size B x p_t
+#'              \item Wt_B_list: Desc. A list of length num_stages with each element a matrix of size B x p_t
+#'              \item beta_B: Desc. A list of length B
+#'              \item sigmay_2B: Desc. A list of length B
+#'              }
 #' @export
 #'
 #' @examples
@@ -60,8 +75,8 @@
 #' # Main
 #' # -----------------------------
 #' gcv_res <- testParallelGCV(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats, p_list, t)
-testParallelGCV <- function(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats,
-                            p_list, t, R = 30, numCores,
+BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats,
+                                     p_list, t, R = 30, numCores,
                             tau = 0.01, B = 10000, nu0 = 3,
                             V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                             alph = 1, gam = 1
@@ -112,6 +127,7 @@ testParallelGCV <- function(Dat.train, Dat.pred, n.train, n.pred, num_stages, nu
              freqs[i,1] <- sum(temp==1)
              freqs[i,2] <- sum(temp==2)
     }
-    # all(apply(freqs, 1, sum) == n) # No need check?
-    return(list("GCV_results" = res_GCV, "freqs" = freqs))
+    # all(apply(freqs, 1, sum) == B) # No need check?
+    post.prob <- freqs/B
+    return(list("GCV_results" = res_GCV, "post.prob" = post.prob, "MC_draws.train", res_mc))
 }
