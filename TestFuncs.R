@@ -8,13 +8,19 @@ p_list      <- c(2, 2, rep(1, num_stages-2))
 num_treats  <- rep(3, num_stages)
 
 Data <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
+res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 100, nu0 = 3,
+                                V0 = mapply(diag, p_list, SIMPLIFY = FALSE), alph = 3, gam = 4, p_list = p_list)
+set.seed(1) #remove later
+Data2 <- generate_dataset(n, num_stages, p_list, num_treats)
 # X <- Data[2:(num_stages+1)]
 # A <- Data[[num_stages+2]]
 # y <- Data[[1]]
-res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 100, nu0 = 3,
+res_mvt2 <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 100, nu0 = 3,
                              V0 = mapply(diag, p_list, SIMPLIFY = FALSE), alph = 3, gam = 4, p_list = p_list)
+equality <- c()
+equality <- c(equality, all(unlist(Data) == unlist(Data2)), all(unlist(res_mvt) == unlist(res_mvt2)))
 
-
+rm(list = setdiff(ls(), "equality"))
 
 # UVT
 set.seed(1) #remove later
@@ -36,6 +42,15 @@ alph <- 3
 gam <- 4
 res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
                                 alph = 3, gam = 4, p_list = rep(1, num_stages))
+
+set.seed(1) #remove later
+Data2 <- generate_dataset(n, num_stages, p_list, num_treats)
+res_uvt2 <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
+                                alph = 3, gam = 4, p_list = rep(1, num_stages))
+
+equality <- c(equality, all(unlist(Data) == unlist(Data2)), all(unlist(res_uvt) == unlist(res_uvt2)))
+rm(list = setdiff(ls(), "equality"))
+
 
 # vec_permutations <- function(max_vals) {
 #     # Create a list of sequences for each position

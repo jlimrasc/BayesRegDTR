@@ -28,7 +28,7 @@
 #' Data        <- generate_dataset(n, num_stages, p_list, num_treats)
 generate_dataset <- function(n, num_stages, p_list, num_treats) {
     if (any(p_list > 1))
-        return (generate_dataset_uvt(n = n, num_stages = num_stages, num_treats = num_treats))
-    else
         return (generate_dataset_mvt(n = n, num_stages = num_stages, p_list = p_list, num_treats = num_treats))
+    else
+        return (generate_dataset_uvt(n = n, num_stages = num_stages, num_treats = num_treats))
 }
