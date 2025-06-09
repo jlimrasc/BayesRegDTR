@@ -69,6 +69,7 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list) {
     thetat_B_list  <- vector(mode = "list", length = num_stages)
     sigmat_2B_list <- vector(mode = "list", length = num_stages)
     for (t in 2:num_stages) {
+        # browser()
         # Compute summary stats
         Zt          <- compute_Zt(A, num_treats, X, t, n, p_list)
         thetat_hat  <- compute_thetat_hat(Zt, X[[t]])
@@ -78,7 +79,7 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list) {
         mt          <- compute_mt(Zt, thetat_hat, omegat_inv)
 
         # Draw
-        thetat_B <- draw_thetat_B(ct, mt, omegat, B, alph, gam, n)
+        thetat_B <- draw_thetat_B(ct, mt, omegat_inv, B, alph, gam, n)
         sigmat_2B <- draw_sigmat_2B(thetat_B, Zt, X[[t]], tau, alph, gam, n)
 
         # Store
