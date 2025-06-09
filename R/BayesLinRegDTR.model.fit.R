@@ -2,6 +2,8 @@
 #'
 #' Fits the Bayesian likelihood-based linear model to obtain an estimated posterior
 #' distribution of the optimal treatment option at a user-specified prediction stage.
+#' Uses backward induction and dynamic programming theory for computing
+#' expected values.
 #'
 #'
 #' @param Dat.train     Training data in format returned by `generate_dataset`:
@@ -29,19 +31,20 @@
 #' @param alph          Inverse-Gamma prior shape parameter for regression error variance of y. default:  1
 #' @param gam           Inverse-Gamma prior rate parameter for regression error variance of y. default:  1
 #'
-#' @returns GCV_results is an array of dimension
-        #' \eqn{n.pred \times num_treats\[t\] x B}{n.pred x num_treats\[t\] x B},
-        #' indicating the expected value under each treatment option at stage t.
-        #' Uses backward induction and dynamic programming theory for computing
-        #' expected values.
-        #' post.prob is an \eqn{n.pred \times num_treats\[t\]}{n.pred x num_treats\[t\]} matrix
-        #' of the posterior probability that each treatment type at stage t is optimal
-        #' MC_draws.train is a list of Monte Carlo draws containing:  \enumerate{
-#'              \item sigmat_B_list: Desc. A list of length num_stages with each element a vector of size B x p_t
-#'              \item Wt_B_list: Desc. A list of length num_stages with each element a matrix of size B x p_t
-#'              \item beta_B: Desc. A list of length B
-#'              \item sigmay_2B: Desc. A list of length B
-#'              }
+#' @returns
+#' \item{GCV_results}{An array of dimension
+#' \eqn{n.pred \times num\_treats[t] \times B}{n.pred x num_treats[t] x B},
+#' indicating the expected value under each treatment option at stage t.}
+#' \item{post.prob}{An \eqn{n.pred \times num\_treats[t]}{n.pred x num_treats[t]}
+#' matrix of the posterior probability that each treatment type at stage t is optimal}
+#' \item{MC_draws.train}{A list of Monte Carlo draws containing:\itemize{
+#' \item{\emph{sigmat_B_list} - A list of length num_stages with each element a
+#' vector of size \eqn{B \times p\_list[t]}{B x p_list[t]}}
+#' \item{\emph{Wt_B_list} - A list of length num_stages with each element a
+#' matrix of size \eqn{B \times p\_list[t]}{B x p_list[t]}}
+#' \item{\emph{beta_B} - A list of length B}
+#' \item{\emph{sigmay_2B} - A list of length B}
+#' }}
 #' @export
 #'
 #' @examples
@@ -93,8 +96,8 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
     else
         res_mc <- compute_MC_draws_uvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
                                        alph = alph, gam = gam, p_list = p_list)
-    res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
-                                    alph = 3, gam = 4, p_list = rep(1, num_stages))
+    # res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = num_treats, B = 10000,
+    #                                 alph = 3, gam = 4, p_list = rep(1, num_stages))
 
     # Set up parallel processing
     if (missing(numCores)) numCores <- parallel::detectCores() - 1
@@ -128,8 +131,8 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
         for (b in 1:B) {
             histDat <- c(lapply(Dat.pred[1:(t-1)], function(x) x[i,,drop = FALSE]), list(Dat.pred[[num_stages + 1]][i,1:(t-1),drop = FALSE]))
             currDat <- Dat.pred[[t]][i,,drop = FALSE]
-            thetat  <- lapply(res_uvt$thetat_B_list, function(x) matrix(x[,b]))
-            Sigmat  <- lapply(res_uvt$sigmat_2B_list, function(x) matrix(x[b]))
+            thetat  <- lapply(res_mc$thetat_B_list, function(x) matrix(x[,b]))
+            Sigmat  <- lapply(res_mc$sigmat_2B_list, function(x) matrix(x[b]))
 
             res_GCV_1B[b,] <-
                 GiveChoiceValue(Wt = thetat, Sigmat = Sigmat, bet = res_mc$beta_B[,b],

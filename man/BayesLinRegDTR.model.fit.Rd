@@ -65,23 +65,25 @@ where t is the prediction stage}
 \item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
 }
 \value{
-GCV_results is an array of dimension
-\eqn{n.pred \times num_treats\[t\] x B}{n.pred x num_treats\[t\] x B},
-indicating the expected value under each treatment option at stage t.
-Uses backward induction and dynamic programming theory for computing
-expected values.
-post.prob is an \eqn{n.pred \times num_treats\[t\]}{n.pred x num_treats\[t\]} matrix
-of the posterior probability that each treatment type at stage t is optimal
-MC_draws.train is a list of Monte Carlo draws containing:  \enumerate{
-\item sigmat_B_list: Desc. A list of length num_stages with each element a vector of size B x p_t
-\item Wt_B_list: Desc. A list of length num_stages with each element a matrix of size B x p_t
-\item beta_B: Desc. A list of length B
-\item sigmay_2B: Desc. A list of length B
-}
+\item{GCV_results}{An array of dimension
+\eqn{n.pred \times num\_treats[t] \times B}{n.pred x num_treats[t] x B},
+indicating the expected value under each treatment option at stage t.}
+\item{post.prob}{An \eqn{n.pred \times num\_treats[t]}{n.pred x num_treats[t]}
+matrix of the posterior probability that each treatment type at stage t is optimal}
+\item{MC_draws.train}{A list of Monte Carlo draws containing:\itemize{
+\item{\emph{sigmat_B_list} - A list of length num_stages with each element a
+vector of size \eqn{B \times p\_list[t]}{B x p_list[t]}}
+\item{\emph{Wt_B_list} - A list of length num_stages with each element a
+matrix of size \eqn{B \times p\_list[t]}{B x p_list[t]}}
+\item{\emph{beta_B} - A list of length B}
+\item{\emph{sigmay_2B} - A list of length B}
+}}
 }
 \description{
 Fits the Bayesian likelihood-based linear model to obtain an estimated posterior
 distribution of the optimal treatment option at a user-specified prediction stage.
+Uses backward induction and dynamic programming theory for computing
+expected values.
 }
 \examples{
 # -----------------------------
