@@ -17,9 +17,13 @@ Imports:
     Rcpp (>= 1.0.13-1), 
     mvtnorm, 
     expm, 
-    foreach
+    foreach,
+    progressr
 Depends:
-    doParallel
+    doParallel,
+    doRNG
+Suggests:
+    cli
 LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

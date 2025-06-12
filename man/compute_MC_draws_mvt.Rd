@@ -13,7 +13,8 @@ compute_MC_draws_mvt(
   V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
   alph,
   gam,
-  p_list
+  p_list,
+  showBar = TRUE
 )
 }
 \arguments{
@@ -30,11 +31,13 @@ X is a list of matrices of the intermediate covariates and A is a matrix of the 
 
 \item{V0}{Inverse-Wishart scale matrix. default: diagonalisation of p_list}
 
-\item{alph}{???}
+\item{alph}{Inverse-Gamma prior shape parameter for regression error variance of y. default:  1}
 
-\item{gam}{???}
+\item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
 
 \item{p_list}{Vector of dimension for each stage}
+
+\item{showBar}{Whether to show a progress bar. Uses bar from \link[progress]{progress_bar} deafult: TRUE}
 }
 \value{
 Monte Carlo draws??? A list containing:  \enumerate{

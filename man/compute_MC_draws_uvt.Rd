@@ -4,7 +4,16 @@
 \alias{compute_MC_draws_uvt}
 \title{Compute Monte Carlo Draws from Univariate Dataset}
 \usage{
-compute_MC_draws_uvt(Data, tau, num_treats, B, alph, gam, p_list)
+compute_MC_draws_uvt(
+  Data,
+  tau,
+  num_treats,
+  B,
+  alph,
+  gam,
+  p_list,
+  showBar = TRUE
+)
 }
 \arguments{
 \item{Data}{Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
@@ -16,11 +25,13 @@ X is a list of matrices of the intermediate covariates and A is a matrix of the 
 
 \item{B}{Number of MC draws}
 
-\item{alph}{Inverse-gamma shape}
+\item{alph}{Inverse-Gamma prior shape parameter for regression error variance of y. default:  1}
 
-\item{gam}{Inverse-gamma rate}
+\item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
 
-\item{p_list}{Vector of dimension for each stage IS THIS REQUIRED???????????????????????????????????????????????????????????????????????}
+\item{p_list}{Vector of dimension for each stage}
+
+\item{showBar}{Whether to show a progress bar. Uses bar from \link[progress]{progress_bar} deafult: TRUE}
 }
 \value{
 Monte Carlo draws??? A list containing:  \enumerate{

@@ -9,7 +9,6 @@ GiveChoiceValue <- function(Wt, Sigmat, bet, sigmay, t, num_stages, p_list, hist
               "length of Wt must be num_stages-1" = length(Wt) == num_stages-1,
               "length of Sigmat must be num_stages-1" = length(Sigmat) == num_stages-1
               )
-    # browser()
 
     if (t == num_stages) {
         n       <- NROW(histDatA)

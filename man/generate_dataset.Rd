@@ -22,7 +22,7 @@ of the intermediate covariates and A is an \eqn{n \times num\_stages}{n x num_st
 assigned treatments
 }
 \description{
-Generate a dataset to test functions on
+Generate a toy dataset for testing BayesLinRegDTR.model.fit
 }
 \examples{
 # -----------------------------

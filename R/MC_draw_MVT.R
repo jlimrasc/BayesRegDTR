@@ -10,9 +10,10 @@
 #' @param B             Number of MC draws
 #' @param nu0           Inverse-Wishart degres of freedom. default: 3
 #' @param V0            Inverse-Wishart scale matrix. default: diagonalisation of p_list
-#' @param alph          ???
-#' @param gam           ???
+#' @param alph          Inverse-Gamma prior shape parameter for regression error variance of y. default:  1
+#' @param gam           Inverse-Gamma prior rate parameter for regression error variance of y. default:  1
 #' @param p_list        Vector of dimension for each stage
+#' @param showBar       Whether to show a progress bar. Uses bar from \link[progress]{progress_bar} deafult: TRUE
 #'
 #' @returns Monte Carlo draws??? A list containing:  \enumerate{
 #'              \item sigmat_B_list: Desc. A list of length num_stages with each element a vector of size B x p_t
@@ -40,7 +41,7 @@
 #' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
 compute_MC_draws_mvt <- function(Data, tau, num_treats, B, nu0 = 3,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-                                 alph, gam, p_list ) {
+                                 alph, gam, p_list, showBar = TRUE) {
     draw_sigmat_B <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
         temp_rwish <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
@@ -94,36 +95,61 @@ compute_MC_draws_mvt <- function(Data, tau, num_treats, B, nu0 = 3,
 
     if (tau < 0) stop("Value of tau must be positive")
 
-    sigmat_B_list   <- vector(mode = "list", length = num_stages)
-    Wt_B_list       <- vector(mode = "list", length = num_stages)
-    for (t in 2:num_stages) {
-        # Compute summary stats
-        Zt          <- compute_Zt(A, num_treats, X, t, n, p_list)
-        omegat      <- compute_omegat(Zt, tau)
-        omegat_inv  <- solve(omegat)
+    # Create bar
+    # cli::cli_progress_bar(status = "t=2", type = "iterator", total = num_stages*2)
+    # showBarOld <- getOption("progress_enabled")
+    # options(progress_enabled = showBar)
+    # pb <- progress::progress_bar$new(format = " Computing MC Draws (t=:stg) [:bar] :percent eta: :eta", total = num_stages*2)
+    # pb$update(0, tokens = list(stg = 2))
+    progressr::with_progress({
+        p <- progressr::progressor(steps = num_stages, enable = showBar,
+                                   message = "Computing MC Draws (t=2)")
 
-        Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
+        # Compute Draws
+        sigmat_B_list   <- vector(mode = "list", length = num_stages)
+        Wt_B_list       <- vector(mode = "list", length = num_stages)
+        for (t in 2:num_stages) {
+            # Compute summary stats
+            Zt          <- compute_Zt(A, num_treats, X, t, n, p_list)
+            omegat      <- compute_omegat(Zt, tau)
+            omegat_inv  <- solve(omegat)
 
-        # Draw
-        sigmat_B <- draw_sigmat_B(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
+            Mnt <- omegat_inv %*% t(Zt) %*% X[[t]]
 
-        Wt_B <- draw_Wt_B_cpp(omegat_inv, Mnt, tau, sigmat_B, p_list[t], ncol(Zt), B)
+            # Draw
+            sigmat_B <- draw_sigmat_B(Zt, X[[t]], Mnt, nu0, V0, tau, n, B, t)
+            Wt_B <- draw_Wt_B_cpp(omegat_inv, Mnt, tau, sigmat_B, p_list[t], ncol(Zt), B)
 
 
-        # Store
-        sigmat_B_list[[t]]  <- sigmat_B
-        Wt_B_list[[t]] <- Wt_B
-    }
+            # Store
+            sigmat_B_list[[t]]  <- sigmat_B
+            Wt_B_list[[t]] <- Wt_B
 
-    ZT1         <- compute_Zt(A, num_treats, X, num_stages+1, n, p_list)
-    thetaT1_hat <- compute_thetat_hat(ZT1, y)
-    omegaT1     <- compute_omegat(ZT1, tau)
-    omegaT1_inv <- solve(omegaT1)
-    cT1         <- compute_ct(ZT1, y, omegaT1_inv, n)
-    mT1         <- compute_mt(ZT1, thetaT1_hat, omegaT1_inv)
+            # cli::cli_progress_update(status = sprintf("t=%d", t + 1))
+            # pb$tick(tokens = list(stg = t + 1))
+            p(message = sprintf("Computing MC Draws (t=%d)", t + 1))
+        }
 
-    beta_B <- draw_beta_B(cT1, mT1, omegaT1_inv, B, alph, gam, n)
-    sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
+        ZT1         <- compute_Zt(A, num_treats, X, num_stages+1, n, p_list)
+        thetaT1_hat <- compute_thetat_hat(ZT1, y)
+        omegaT1     <- compute_omegat(ZT1, tau)
+        omegaT1_inv <- solve(omegaT1)
+        cT1         <- compute_ct(ZT1, y, omegaT1_inv, n)
+        mT1         <- compute_mt(ZT1, thetaT1_hat, omegaT1_inv)
+
+        beta_B <- draw_beta_B(cT1, mT1, omegaT1_inv, B, alph, gam, n)
+        sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
+
+        # Complete bar
+        # cli::cli_progress_update()
+        # cli::cli_progress_done()
+        # pb$tick(tokens = list(stg = num_stages + 1))
+        # pb$terminate()
+        p(message = sprintf("Computing MC Draws (t=%d)", num_stages + 1))
+
+        # Reset bar settings
+        # options(progress_enabled = showBarOld)
+    })
 
     return(list(sigmat_B_list = sigmat_B_list[-1], Wt_B_list = Wt_B_list[-1],
                 beta_B = beta_B, sigmay_2B = sigmay_2B))

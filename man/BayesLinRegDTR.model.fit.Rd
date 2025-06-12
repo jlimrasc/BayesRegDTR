@@ -2,7 +2,7 @@
 % Please edit documentation in R/BayesLinRegDTR.model.fit.R
 \name{BayesLinRegDTR.model.fit}
 \alias{BayesLinRegDTR.model.fit}
-\title{BayesLinRegDTR.model.fit}
+\title{Main function for fitting a Bayesian likelihood-based linear regression model}
 \usage{
 BayesLinRegDTR.model.fit(
   Dat.train,
@@ -20,7 +20,8 @@ BayesLinRegDTR.model.fit(
   nu0 = 3,
   V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
   alph = 1,
-  gam = 1
+  gam = 1,
+  showBar = TRUE
 )
 }
 \arguments{
@@ -63,6 +64,9 @@ where t is the prediction stage}
 \item{alph}{Inverse-Gamma prior shape parameter for regression error variance of y. default:  1}
 
 \item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
+
+\item{showBar}{Whether to show a progress bar. Uses bar from \link[progress]{progress_bar}
+and \link[doParabar]{doParabar} for parallel integration deafult: TRUE}
 }
 \value{
 \item{GCV_results}{An array of dimension
@@ -85,24 +89,64 @@ distribution of the optimal treatment option at a user-specified prediction stag
 Uses backward induction and dynamic programming theory for computing
 expected values.
 }
+\details{
+Utilises a \link[future]{future} framework, so to enable
+parallel processing and register a parallel backend, \link[future]{plan} and
+\link[doFuture]{registerDoParallel} must be called first. Additionally,
+progress bars use \link[progressr]{progressr} API, and a non-default progress
+bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoParallel} and
+\link[progressr]{handlers} for examples. Note that to have a progress bar for
+the parallel sections, future must be used.
+}
 \examples{
+# Code does not run within 10 seconds, so don't run
+\dontrun{
+progressr::handlers("cli")          # Set handler to something with title/text
+future::plan(future::multisession)  # or plan(multicore) on Unix
+doFuture::registerDoFuture()        # or doParallel::registerDoParallel()
+                                    # if no progress bar is needed and future
+                                    # is unwanted
+
+## UVT
+# -----------------------------
+# Initialise Inputs
+# -----------------------------
+num_stages  <- 5
+t           <- 3
+p_list      <- rep(1, num_stages)
+num_treats  <- rep(2, num_stages)
+n.train     <- 5000
+n.pred      <- 10
+numCores    <- parallel::detectCores()
+
+# -----------------------------
+# Generate Dataset
+# -----------------------------
+Dat.train  <- generate_dataset(n.train,  num_stages, p_list, num_treats)
+Dat.pred  <- generate_dataset(n.pred,  num_stages, p_list, num_treats)
+Dat.pred  <- Dat.pred[-1]
+Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
+
+# -----------------------------
+# Main
+# -----------------------------
+gcv_uvt <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
+                                    num_stages, num_treats,
+                                    p_list, t, R = 30, numCores,
+                                    tau = 0.01, B = 500, nu0 = NULL,
+                                    V0 = NULL, alph = 3, gam = 4)
+
+## MVT
 # -----------------------------
 # Initialise Inputs
 # -----------------------------
 num_stages  <- 3
+t           <- 2
 p_list      <- rep(2, num_stages)
 num_treats  <- rep(2, num_stages)
 n.train     <- 5000
-n.pred      <- 100
-
-tau     <- 0.01
-B       <- 100
-alph    <- 3
-gam     <- 4
-nu0     <- 3
-V0      <- mapply(diag, p_list, SIMPLIFY = FALSE)
-R       <- 30
-numCores<- parallel::detectCores()
+n.pred      <- 10
+numCores    <- parallel::detectCores()
 
 # -----------------------------
 # Generate Dataset
@@ -115,5 +159,11 @@ Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = 
 # -----------------------------
 # Main
 # -----------------------------
-gcv_res <- testParallelGCV(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats, p_list, t)
+gcv_res <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
+                                    num_stages, num_treats,
+                                    p_list, t, R = 30, numCores,
+                                    tau = 0.01, B = 500, nu0 = 3,
+                                    V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
+                                    alph = 3, gam = 4)
+}
 }
