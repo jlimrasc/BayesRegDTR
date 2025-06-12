@@ -205,22 +205,13 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
         }
         return(res_GCV_1B)
     }
-    # Set up parallel processing
-    # if (missing(numCores)) numCores <- parallel::detectCores() - 1
-    # doParallel::registerDoParallel(numCores)  # use multicore, set to the number of our cores
-    # with(doFuture::registerDoFuture(), local = TRUE) # register future backend with foreach
-    # backend <- parabar::start_backend(cores = numCores, cluster_type = "psock", backend_type = "async") # Backend for progress bar
-    # doParabar::registerDoParabar(backend) # Register it with the `foreach` package.
 
     # Calculate all GCVs
     if (reporting) print("=== Predicting Data ===")
     ntreats_t <- num_treats[t]
     progressr::with_progress({
-        p <- progressr::progressor(steps = n.pred + 1, message = "Predicting data", enable = showBar)
+        p <- progressr::progressor(steps = n.pred + 1, message = "Predicting data", enable = showBar) # Create bar
         if (any(p_list > 1)) {
-            # res_GCV <- foreach(i=1:n.pred, .inorder = TRUE, .packages = "mvtnorm",
-            #                    .export = c("inner_b_GCV_MVT", "ntreats_t", "p_list",
-            #                                "Dat.pred", "res_mc_f", "GiveChoiceValue")) %dopar% inner_b_GCV_MVT(i, ntreats_t, p_list)
             res_GCV <- foreach(i = 1:n.pred, .inorder = TRUE, .packages = "mvtnorm", .export = c("GiveChoiceValue")) %dorng% {
                 p()
                 inner_b_GCV_MVT(i, ntreats_t, p_list)
@@ -240,36 +231,20 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
 
     if (reporting) print("=== Prediction Completed ===")
 
-    # Stop the backend
-    # parabar::stop_backend(backend)
-
     # Calculate frequencies
     if (reporting) print("=== Computing Frequencies ===")
-    # Create bar
-    # showBarOld <- getOption("progress_enabled")
-    # options(progress_enabled = showBar)
-    # pb <- progress::progress_bar$new( format = " Calculating Freqs [:bar] :percent eta: :eta", total = n.train)
     progressr::with_progress({
         p <- progressr::progressor(steps = floor(n.train/10), enable = showBar,
-                                   message = "Computing Frequencies")
+                                   message = "Computing Frequencies") # Create bar
         freqs <- matrix(0, ncol = ntreats_t, nrow = n.train)
         foreach (i = 1:n.train) %dopar% {
                  temp <- apply(res_GCV[,,i], 1, which.max)
                  freqs[i, 1:ntreats_t] <- tabulate(temp, nbins = ntreats_t)
-                 # cli::cli_progress_update()
-                 # pb$tick()
                  if (i%%10 == 0) p()
         }
         post.prob <- freqs/B
     })
 
-    # Complete bar
-    # cli::cli_progress_update()
-    # cli::cli_progress_done()
-    # pb$tick(tokens = list(stg = num_stages + 1))
-    # pb$terminate()
-    # Reset bar settings
-    # options(progress_enabled = showBarOld)
     if (reporting) print("=== Frequencies Completed ===")
 
 

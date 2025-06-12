@@ -68,11 +68,6 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, sh
     n <- nrow(X[[1]])
 
     # Create bar
-    # cli::cli_progress_bar("Computing MC draws", "t=2", "iterator", num_stages*3)
-    # showBarOld <- getOption("progress_enabled")
-    # options(progress_enabled = showBar)
-    # pb <- progress::progress_bar$new(format = " Computing MC draws (t=:stg) [:bar] :percent eta: :eta", total = num_stages*2)
-    # pb$update(0, tokens = list(stg = 2))
     progressr::with_progress({
         p <- progressr::progressor(steps = num_stages, enable = showBar,
                                    message = "Computing MC Draws (t=2)")
@@ -96,8 +91,6 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, sh
             thetat_B_list[[t]]  <- thetat_B
             sigmat_2B_list[[t]] <- sigmat_2B
 
-            # cli::cli_progress_update(status = sprintf("t=%d", t + 1))
-            # pb$tick(tokens = list(stg = t + 1))
             p(message = sprintf("Computing MC Draws (t=%d)", t + 1))
         }
 
@@ -112,10 +105,6 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, sh
         sigmay_2B <- draw_sigmay_2B(beta_B, ZT1, y, tau, alph, gam, n)
 
         # Complete bar
-        # cli::cli_progress_update()
-        # cli::cli_progress_done()
-        # pb$tick(tokens = list(stg = num_stages + 1))
-        # pb$terminate()
         p(message = sprintf("Computing MC Draws (t=%d)", num_stages + 1))
     })
 
