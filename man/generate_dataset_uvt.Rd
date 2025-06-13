@@ -14,9 +14,10 @@ generate_dataset_uvt(n, num_stages, num_treats)
 \item{num_treats}{Vector of number of treatment options at each stage}
 }
 \value{
-Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
-X is a list of matrices of the intermediate covariates
-and A is a matrix of the assigned treatments
+Observed data organised as a list of \eqn{\{y, X, A\}} where y is a
+vector of the final outcomes, X is a list of matrices of the intermediate
+covariates and A is a matrix of the assigned treatments
+#' @export
 }
 \description{
 Generate Univariate Dataset

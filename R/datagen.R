@@ -1,6 +1,6 @@
 #' Generate Dataset
 #'
-#' Generate a dataset to test functions on
+#' Generate a toy dataset for testing BayesLinRegDTR.model.fit
 #'
 #' @param n             Number of samples/individuals to generate
 #' @param num_stages    Total number of stages per individual

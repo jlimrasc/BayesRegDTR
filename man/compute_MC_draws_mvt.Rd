@@ -18,7 +18,7 @@ compute_MC_draws_mvt(
 )
 }
 \arguments{
-\item{Data}{Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+\item{Data}{Observed data organised as a list of \eqn{\{y, X, A\}} where y is a vector of the final outcomes,
 X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments}
 
 \item{tau}{Prior precision scale. Should be specified with a small value}
@@ -63,5 +63,7 @@ Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
 # -----------------------------
 # Main
 # -----------------------------
-res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3,
+                                B = 100, nu0 = 3, V0 = diag(2), alph = 3,
+                                gam = 4, p_list = 2)
 }

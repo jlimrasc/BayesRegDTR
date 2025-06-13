@@ -7,9 +7,9 @@
 #'
 #' Utilises a \link[future]{future} framework, so to enable
 #' parallel processing and register a parallel backend, \link[future]{plan} and
-#' \link[doFuture]{registerDoParallel} must be called first. Additionally,
+#' \link[doFuture]{registerDoFuture} must be called first. Additionally,
 #' progress bars use \link[progressr]{progressr} API, and a non-default progress
-#' bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoParallel} and
+#' bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoFuture} and
 #' \link[progressr]{handlers} for examples. Note that to have a progress bar for
 #' the parallel sections, future must be used.
 #'
@@ -38,8 +38,8 @@
 #' @param V0            List of Inverse-Wishart prior scale matrix for regression error Vcov matrix. Ignored if using a univariate dataset. default: list of identity matrices
 #' @param alph          Inverse-Gamma prior shape parameter for regression error variance of y. default:  1
 #' @param gam           Inverse-Gamma prior rate parameter for regression error variance of y. default:  1
-#' @param showBar       Whether to show a progress bar. Uses bar from \link[progress]{progress_bar}
-#' and \link[doParabar]{doParabar} for parallel integration deafult: TRUE
+#' @param showBar       Whether to show a progress bar. Uses API from \link[progressr]{progressr}
+#' and \link[future]{future} for parallel integration deafult: TRUE
 #'
 #' @returns
 #' \item{GCV_results}{An array of dimension
@@ -209,17 +209,20 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
     # Calculate all GCVs
     if (reporting) print("=== Predicting Data ===")
     ntreats_t <- num_treats[t]
+    i <- NULL # Stop complaining CRAN!
     progressr::with_progress({
         p <- progressr::progressor(steps = n.pred + 1, message = "Predicting data", enable = showBar) # Create bar
         if (any(p_list > 1)) {
-            res_GCV <- foreach(i = 1:n.pred, .inorder = TRUE, .packages = "mvtnorm", .export = c("GiveChoiceValue")) %dorng% {
+            res_GCV <- foreach::foreach(i = 1:n.pred, .inorder = TRUE,
+                                        .packages = "mvtnorm") %dorng% {
                 p()
                 inner_b_GCV_MVT(i, ntreats_t, p_list)
             }
         }
 
         else
-            res_GCV <- foreach(i = 1:n.pred, .inorder = TRUE, .packages = "mvtnorm") %dorng% {
+            res_GCV <- foreach::foreach(i = 1:n.pred, .inorder = TRUE,
+                                        .packages = "mvtnorm") %dorng% {
                 p()
                 inner_b_GCV_UVT(i, ntreats_t, p_list)
             }
@@ -236,13 +239,12 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_s
     progressr::with_progress({
         p <- progressr::progressor(steps = floor(n.train/10), enable = showBar,
                                    message = "Computing Frequencies") # Create bar
-        freqs <- matrix(0, ncol = ntreats_t, nrow = n.train)
-        foreach (i = 1:n.train) %dopar% {
-                 temp <- apply(res_GCV[,,i], 1, which.max)
-                 freqs[i, 1:ntreats_t] <- tabulate(temp, nbins = ntreats_t)
+        freqs <- foreach::foreach (i = 1:n.train, .combine = rbind) %dopar% {
                  if (i%%10 == 0) p()
+                 temp <- apply(res_GCV[,,i], 1, which.max)
+                 tabulate(temp, nbins = ntreats_t)
         }
-        post.prob <- freqs/B
+        post.prob <- unname(freqs)/B
     })
 
     if (reporting) print("=== Frequencies Completed ===")

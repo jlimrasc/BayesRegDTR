@@ -4,10 +4,10 @@
 #' @param num_stages    Total number of stages per individual
 #' @param num_treats    Vector of number of treatment options at each stage
 #'
-#' @returns Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
-#' X is a list of matrices of the intermediate covariates
-#' and A is a matrix of the assigned treatments
-#' @export
+#' @returns Observed data organised as a list of \eqn{\{y, X, A\}} where y is a
+#' vector of the final outcomes, X is a list of matrices of the intermediate
+#' covariates and A is a matrix of the assigned treatments
+#' #' @export
 #' @examples
 #' # -----------------------------
 #' # Initialise Inputs
@@ -28,7 +28,7 @@ generate_dataset_uvt <- function(n, num_stages, num_treats) {
     p_list      <- rep(1, num_stages)
 
     # Step 1
-    x_i1 <- matrix(rt(n * p_list[1], df = 10), nrow = n, ncol = p_list[1])
+    x_i1 <- matrix(stats::rt(n * p_list[1], df = 10), nrow = n, ncol = p_list[1])
 
     # Step 2
     A <- sapply(num_treats, function(a_max) sample(a_max, n, replace = TRUE))
@@ -91,7 +91,7 @@ generate_dataset_uvt <- function(n, num_stages, num_treats) {
         }
     }
 
-    yi <- rnorm(n, mean = mi, sd = 1)
+    yi <- stats::rnorm(n, mean = mi, sd = 1)
 
     return(c(list(yi), X, list(A)))
 }

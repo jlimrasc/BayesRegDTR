@@ -3,7 +3,7 @@
 #' @description
 #' Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 #'
-#' @param Data          Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+#' @param Data          Observed data organised as a list of \eqn{\{y, X, A\}} where y is a vector of the final outcomes,
 #' X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments
 #' @param tau           Prior precision scale. Should be specified with a small value
 #' @param num_treats    Vector of number of treatment options at each stage
@@ -33,7 +33,9 @@
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, num_stages))
+#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1,
+#'                             B = 10000, alph = 3, gam = 4,
+#'                             p_list = rep(1, num_stages))
 compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, showBar = TRUE) {
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
         t(mvtnorm::rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
@@ -41,11 +43,15 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, sh
              delta = mt,
              type = "shifted")) # Draw all B at once
     }
+    res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1,
+                                B = 10000, alph = 3, gam = 4,
+                                p_list = rep(1, num_stages))
 
     draw_sigmat_2B <- function(thetat_B, Zt, Xt, tau, alph, gam, n) {
         draw_sigmat_2B_inner <- function(thetat_B, Zt, Xt, tau, alph, gam, n) {
-            1 / rgamma(1, shape = alph + (n + ncol(Zt)) / 2,
-                       rate = gam + 1/2 * (sum((Xt - Zt %*% thetat_B)^2) + tau * sum(thetat_B^2)))
+            1 / stats::rgamma(1, shape = alph + (n + ncol(Zt)) / 2,
+                              rate = gam + 1/2 * (sum((Xt - Zt %*% thetat_B)^2) +
+                                                      tau * sum(thetat_B^2)))
         }
 
         # Run function for each b

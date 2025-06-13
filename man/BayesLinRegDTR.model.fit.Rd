@@ -65,8 +65,8 @@ where t is the prediction stage}
 
 \item{gam}{Inverse-Gamma prior rate parameter for regression error variance of y. default:  1}
 
-\item{showBar}{Whether to show a progress bar. Uses bar from \link[progress]{progress_bar}
-and \link[doParabar]{doParabar} for parallel integration deafult: TRUE}
+\item{showBar}{Whether to show a progress bar. Uses API from \link[progressr]{progressr}
+and \link[future]{future} for parallel integration deafult: TRUE}
 }
 \value{
 \item{GCV_results}{An array of dimension
@@ -92,9 +92,9 @@ expected values.
 \details{
 Utilises a \link[future]{future} framework, so to enable
 parallel processing and register a parallel backend, \link[future]{plan} and
-\link[doFuture]{registerDoParallel} must be called first. Additionally,
+\link[doFuture]{registerDoFuture} must be called first. Additionally,
 progress bars use \link[progressr]{progressr} API, and a non-default progress
-bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoParallel} and
+bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoFuture} and
 \link[progressr]{handlers} for examples. Note that to have a progress bar for
 the parallel sections, future must be used.
 }

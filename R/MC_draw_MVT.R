@@ -3,7 +3,7 @@
 #' @description
 #' Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 #'
-#' @param Data      Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+#' @param Data      Observed data organised as a list of \eqn{\{y, X, A\}} where y is a vector of the final outcomes,
 #' X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments
 #' @param tau           Prior precision scale. Should be specified with a small value
 #' @param num_treats    Vector of number of treatment options at each stage
@@ -38,28 +38,31 @@
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3, B = 100, nu0 = 3, V0 = diag(2), alph = 3, gam = 4, p_list = 2)
+#' res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3,
+#'                                 B = 100, nu0 = 3, V0 = diag(2), alph = 3,
+#'                                 gam = 4, p_list = 2)
 compute_MC_draws_mvt <- function(Data, tau, num_treats, B, nu0 = 3,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                  alph, gam, p_list, showBar = TRUE) {
     draw_sigmat_B <- function(Zt, Xt, Mnt, nu0, V0, tau, n, B, t) {
         Vn <- V0[[t]] + t(Xt - Zt %*% Mnt) %*% (Xt - Zt %*%Mnt) + tau * t(Mnt) %*% Mnt
-        temp_rwish <- rWishart(B, df = n + nu0, Sigma = solve(Vn))
+        temp_rwish <- stats::rWishart(B, df = n + nu0, Sigma = solve(Vn))
 
         return(apply(temp_rwish, 3, solve, simplify = FALSE))
     }
 
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
         t(mvtnorm::rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
-               df = n+2*alph,
-               delta = mt,
-               type = "shifted")) # Draw all B at once
+                        df = n+2*alph,
+                        delta = mt,
+                        type = "shifted")) # Draw all B at once
     }
 
     draw_sigmat_2B <- function(thetat_b, Zt, Xt, tau, alph, gam, n) {
         draw_sigmat_2b_inner <- function(thetat_b, Zt, Xt, tau, alph, gam, n) {
-            1 / rgamma(1, shape = alph + (n + ncol(Zt)) / 2,
-                       rate = gam + 1/2 * (sum((Xt - Zt %*% thetat_b)^2) + tau * sum(thetat_b^2)))
+            1 / stats::rgamma(1, shape = alph + (n + ncol(Zt)) / 2,
+                              rate = gam + 1/2 * (sum((Xt - Zt %*% thetat_b)^2) +
+                                                      tau * sum(thetat_b^2)))
         }
 
         # Run function for each b

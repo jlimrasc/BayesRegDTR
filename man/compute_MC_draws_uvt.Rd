@@ -16,7 +16,7 @@ compute_MC_draws_uvt(
 )
 }
 \arguments{
-\item{Data}{Observed data organised as a list of {y, X, A} where y is a vector of the final outcomes,
+\item{Data}{Observed data organised as a list of \eqn{\{y, X, A\}} where y is a vector of the final outcomes,
 X is a list of matrices of the intermediate covariates and A is a matrix of the assigned treatments}
 
 \item{tau}{Prior precision scale. Should be specified with a small value}
@@ -56,5 +56,7 @@ Data <- generate_dataset_uvt(n, num_stages, num_treats)
 # -----------------------------
 # Main
 # -----------------------------
-res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1, B = 10000, alph = 3, gam = 4, p_list = rep(1, num_stages))
+res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1,
+                            B = 10000, alph = 3, gam = 4,
+                            p_list = rep(1, num_stages))
 }
