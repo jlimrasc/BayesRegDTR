@@ -19,9 +19,10 @@
 #'              \item beta_B: Desc. A list of length B
 #'              \item sigmay_2B: Desc. A list of length B
 #'              }
-#' @export
+#' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' # -----------------------------
 #' # Initialise Inputs
 #' # -----------------------------
@@ -33,9 +34,10 @@
 #' # -----------------------------
 #' # Main
 #' # -----------------------------
-#' res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1,
-#'                             B = 10000, alph = 3, gam = 4,
-#'                             p_list = rep(1, num_stages))
+#' res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = 1,
+#'                                 B = 10000, alph = 3, gam = 4,
+#'                                 p_list = rep(1, num_stages))
+#' }
 compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, showBar = TRUE) {
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
         t(mvtnorm::rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,
@@ -43,9 +45,6 @@ compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, sh
              delta = mt,
              type = "shifted")) # Draw all B at once
     }
-    res_uvt <- compute_MC_draws(Data = Data, tau = 0.01, num_treats = 1,
-                                B = 10000, alph = 3, gam = 4,
-                                p_list = rep(1, num_stages))
 
     draw_sigmat_2B <- function(thetat_B, Zt, Xt, tau, alph, gam, n) {
         draw_sigmat_2B_inner <- function(thetat_B, Zt, Xt, tau, alph, gam, n) {

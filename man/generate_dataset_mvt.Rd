@@ -24,6 +24,7 @@ covariates and A is a matrix of the assigned treatments
 Generate Multivariate dataset
 }
 \examples{
+\dontrun{
 # -----------------------------
 # Initialise Inputs
 # -----------------------------
@@ -37,3 +38,5 @@ num_treats  <- rep(3, num_stages)
 # -----------------------------
 Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
 }
+}
+\keyword{internal}

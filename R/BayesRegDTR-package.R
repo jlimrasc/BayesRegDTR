@@ -1,4 +1,3 @@
-#' @keywords internal
 #' @references References: Yu, W., & Bondell, H. D. (2023), “Bayesian Likelihood-Based Regression
 #' for Estimation of Optimal Dynamic Treatment Regimes”, Journal of the Royal
 #' Statistical Society Series B: Statistical Methodology, 85(3), 551-574.

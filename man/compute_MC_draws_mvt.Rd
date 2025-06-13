@@ -51,6 +51,7 @@ Monte Carlo draws??? A list containing:  \enumerate{
 Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 }
 \examples{
+\dontrun{
 # -----------------------------
 # Initialise Inputs
 # -----------------------------
@@ -67,3 +68,5 @@ res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3,
                                 B = 100, nu0 = 3, V0 = diag(2), alph = 3,
                                 gam = 4, p_list = 2)
 }
+}
+\keyword{internal}

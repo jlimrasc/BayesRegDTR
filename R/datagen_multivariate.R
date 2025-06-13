@@ -8,9 +8,10 @@
 #' @returns Observed data organised as a list of \eqn{\{y, X, A\}} where y is a
 #' vector of the final outcomes, X is a list of matrices of the intermediate
 #' covariates and A is a matrix of the assigned treatments
-#' @export
+#' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' # -----------------------------
 #' # Initialise Inputs
 #' # -----------------------------
@@ -23,6 +24,7 @@
 #' # Main
 #' # -----------------------------
 #' Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
+#' }
 generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
 
     stopifnot("num_treats length must equal num_stages" = length(force(num_treats)) == num_stages)

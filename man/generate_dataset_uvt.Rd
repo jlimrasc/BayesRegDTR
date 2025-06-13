@@ -17,12 +17,12 @@ generate_dataset_uvt(n, num_stages, num_treats)
 Observed data organised as a list of \eqn{\{y, X, A\}} where y is a
 vector of the final outcomes, X is a list of matrices of the intermediate
 covariates and A is a matrix of the assigned treatments
-#' @export
 }
 \description{
 Generate Univariate Dataset
 }
 \examples{
+\dontrun{
 # -----------------------------
 # Initialise Inputs
 # -----------------------------
@@ -34,5 +34,6 @@ num_treats  <- rep(3, num_stages)
 # Main
 # -----------------------------
 Data <- generate_dataset_uvt(n, num_stages, num_treats)
-
 }
+}
+\keyword{internal}
