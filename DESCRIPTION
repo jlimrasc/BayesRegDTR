@@ -1,0 +1,42 @@
+Package: BayesRegDTR
+Type: Package
+Title: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based Regression Method
+Version: 1.0.0
+Authors@R: c(
+    person(
+      "Jeremy", "Lim",
+      email = "jeremylim23@gmail.com",
+      role = c("aut", "cre")
+    ),
+    person(
+      "Weichang", "Yu",
+      email = "weichang.yu@unimelb.edu.au",
+      role = c("aut"), 
+      comment = c(ORCID = "0000-0002-0399-3779")
+    )
+  )
+Description: Methods to estimate optimal dynamic treatment regimes using Bayesian
+    likelihood-based regression approach as described in  Yu, W., & Bondell, H. D. (2023).
+    Uses backward induction and dynamic programming theory for computing
+    expected values. Offers options for future parallel computing.
+License: GPL (>= 3)
+Imports: 
+    Rcpp (>= 1.0.13-1), 
+    mvtnorm, 
+    foreach,
+    progressr,
+    stats,
+    future
+Depends:
+    doRNG
+Suggests:
+    cli,
+    testthat (>= 3.0.0),
+    doFuture
+LinkingTo: Rcpp, RcppArmadillo
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+URL: https://github.com/jlimrasc/BayesRegDTR
+BugReports: https://github.com/jlimrasc/BayesRegDTR/issues
+Config/testthat/edition: 3
