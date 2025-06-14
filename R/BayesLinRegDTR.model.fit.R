@@ -31,7 +31,6 @@
 #' @param p_list        Vector of intermediate covariate dimensions for each stage
 #' @param t             Prediction stage t, where t \eqn{\leq}{<=} num_stages
 #' @param R             Draw size from distribution of intermediate covariates. default:  30
-#' @param numCores      Number of cores in the system to use. default uses parallel::detectCores() - 1
 #' @param tau           Normal prior scale parameter for regression coefficients. Should be specified with a small value. default:  0.01
 #' @param B             Number of MC draws from posterior of regression parameters. default 10000
 #' @param nu0           Inverse-Wishart prior degrees of freedom for regression error Vcov matrix. Ignored if using a univariate dataset. default: 3
@@ -60,9 +59,14 @@
 #' @examples
 #' # Code does not run within 10 seconds, so don't run
 #' \dontrun{
+#' # -----------------------------
+#' # Set Up Parallelism & Progress Bar
+#' # -----------------------------
 #' progressr::handlers("cli")          # Set handler to something with title/text
-#' future::plan(future::multisession)  # or plan(multicore) on Unix
-#' doFuture::registerDoFuture()        # or doParallel::registerDoParallel()
+#' numCores <- parallel::detectCores() # Detect number of cores, use max
+#' future::plan(future::multisession,  # Or plan(multicore, workers) on Unix
+#'             workers = numCores)     # Set number of cores to use
+#' doFuture::registerDoFuture()        # Or doParallel::registerDoParallel()
 #'                                     # if no progress bar is needed and future
 #'                                     # is unwanted
 #'
@@ -76,7 +80,6 @@
 #' num_treats  <- rep(2, num_stages)
 #' n.train     <- 5000
 #' n.pred      <- 10
-#' numCores    <- parallel::detectCores()
 #'
 #' # -----------------------------
 #' # Generate Dataset
@@ -91,7 +94,7 @@
 #' # -----------------------------
 #' gcv_uvt <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
 #'                                     num_stages, num_treats,
-#'                                     p_list, t, R = 30, numCores,
+#'                                     p_list, t, R = 30,
 #'                                     tau = 0.01, B = 500, nu0 = NULL,
 #'                                     V0 = NULL, alph = 3, gam = 4)
 #'
@@ -105,7 +108,6 @@
 #' num_treats  <- rep(2, num_stages)
 #' n.train     <- 5000
 #' n.pred      <- 10
-#' numCores    <- parallel::detectCores()
 #'
 #' # -----------------------------
 #' # Generate Dataset
@@ -120,17 +122,18 @@
 #' # -----------------------------
 #' gcv_res <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
 #'                                     num_stages, num_treats,
-#'                                     p_list, t, R = 30, numCores,
+#'                                     p_list, t, R = 30,
 #'                                     tau = 0.01, B = 500, nu0 = 3,
 #'                                     V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
 #'                                     alph = 3, gam = 4)
 #' }
-BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred, num_stages, num_treats,
-                                     p_list, t, R = 30, numCores,
-                            tau = 0.01, B = 10000, nu0 = 3,
-                            V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-                            alph = 1, gam = 1, showBar = TRUE
-                            ) {
+BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
+                                     num_stages, num_treats,
+                                     p_list, t, R = 30,
+                                     tau = 0.01, B = 10000, nu0 = 3,
+                                     V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
+                                     alph = 1, gam = 1, showBar = TRUE
+                                     ) {
 
     # Verify inputs
     stopifnot("t must be less than or equal to num_stages" = t <= num_stages)

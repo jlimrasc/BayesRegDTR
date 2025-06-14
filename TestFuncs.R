@@ -205,7 +205,7 @@ Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = 
 
 gcv_uvt <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
                                     num_stages, num_treats,
-                                    p_list, t, R = 30, numCores,
+                                    p_list, t, R = 30,
                                     tau = 0.01, B = 500, nu0 = NULL,
                                     V0 = NULL, alph = 3, gam = 4)
 
@@ -229,7 +229,7 @@ doFuture::registerDoFuture()
 doParallel::registerDoParallel(numCores)  # use multicore, set to the number of our cores
 gcv_res <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
                                     num_stages, num_treats,
-                                    p_list, t, R = 30, numCores,
+                                    p_list, t, R = 30,
                                     tau = 0.01, B = 500, nu0 = 3,
                                     V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
                                     alph = 3, gam = 4)
