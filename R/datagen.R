@@ -21,8 +21,8 @@
 #' # -----------------------------
 #' n           <- 5000
 #' num_stages  <- 3
-#' p_list_uvt      <- rep(1, num_stages)
-#' p_list_mvt      <- c(1, 3, 3)
+#' p_list_uvt  <- rep(1, num_stages)
+#' p_list_mvt  <- c(1, 3, 3)
 #' num_treats  <- rep(3, num_stages)
 #'
 #' # -----------------------------

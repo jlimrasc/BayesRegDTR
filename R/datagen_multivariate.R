@@ -48,7 +48,7 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
         C_max <- matrix(0, nrow = max(p_list), ncol = max(p_list))
         C_max <- (-1) ^ (row(C_max) + col(C_max))
 
-        C <- C_max[1:p_list[t], 1:p_list[t-1]]
+        C <- C_max[1:p_list[t], 1:p_list[t-1], drop = FALSE]
 
         gen_xit1 <- function(X_it1, A2, A3, t) {
             A2 * ( t * C %*% X_it1) + # If a==2
@@ -65,8 +65,8 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
 
     if (num_stages > 2) {
         t <- 3
-        C <- C_max[1:p_list[t], 1:p_list[t-1]]
-        C2 <- C_max[1:p_list[t], 1:p_list[t-2]]
+        C <- C_max[1:p_list[t], 1:p_list[t-1], drop = FALSE]
+        C2 <- C_max[1:p_list[t], 1:p_list[t-2], drop = FALSE]
         gen_xit2 <- function(X_it1, X_it2, A2, A3, t, p_t) {
             A2 * ( t * C %*% X_it1 -     (t-1) * C2 %*% X_it2) + # If a==2
             A3 * (-t * C %*% X_it1 + sqrt(t-1) * C2 %*% X_it2) # Elif a==3
@@ -83,9 +83,9 @@ generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
     if (num_stages > 3) {
         for (t in 4:num_stages) {
             # Could use dplyr instead
-            C <- C_max[1:p_list[t], 1:p_list[t-1]]
-            C2 <- C_max[1:p_list[t], 1:p_list[t-2]]
-            C3 <- C_max[1:p_list[t], 1:p_list[t-3]]
+            C <- C_max[1:p_list[t], 1:p_list[t-1], drop = FALSE]
+            C2 <- C_max[1:p_list[t], 1:p_list[t-2], drop = FALSE]
+            C3 <- C_max[1:p_list[t], 1:p_list[t-3], drop = FALSE]
 
             gen_xit3 <- function(X_it1, X_it2, X_it3, A2, A3, t, p_t) {
                 A2 * ( t * C %*% X_it1 -     (t-1) * C2 %*% X_it2 +     (t-2) * C3 %*% X_it3) + # If a==2
