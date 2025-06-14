@@ -1,18 +1,17 @@
 Package: BayesRegDTR
 Type: Package
-Title: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-based Regression Method
+Title: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based Regression Method
 Version: 0.1.0
-Date: 2025-06-01
 Authors@R: c(
     person(
       "Jeremy", "Lim",
       email = "jeremylim23@gmail.com",
-      role = c("aut")
+      role = c("aut", "cre")
     ),
     person(
       "Weichang", "Yu",
       email = "weichang.yu@unimelb.edu.au",
-      role = c("aut", "cre"), 
+      role = c("aut"), 
       comment = c(ORCID = "0000-0002-0399-3779")
     )
   )
@@ -32,7 +31,8 @@ Depends:
     doRNG
 Suggests:
     cli,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    doFuture
 LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

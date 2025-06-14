@@ -4,7 +4,7 @@
 \name{BayesRegDTR-package}
 \alias{BayesRegDTR}
 \alias{BayesRegDTR-package}
-\title{BayesRegDTR: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-based Regression Method}
+\title{BayesRegDTR: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based Regression Method}
 \description{
 Methods to estimate optimal dynamic treatment regimes using Bayesian likelihood-based regression approach as described in Yu, W., & Bondell, H. D. (2023). Uses backward induction and dynamic programming theory for computing expected values. Offers options for future parallel computing.
 }
@@ -27,11 +27,11 @@ Useful links:
 }
 }
 \author{
-\strong{Maintainer}: Weichang Yu \email{weichang.yu@unimelb.edu.au} (\href{https://orcid.org/0000-0002-0399-3779}{ORCID})
+\strong{Maintainer}: Jeremy Lim \email{jeremylim23@gmail.com}
 
 Authors:
 \itemize{
-  \item Jeremy Lim \email{jeremylim23@gmail.com}
+  \item Weichang Yu \email{weichang.yu@unimelb.edu.au} (\href{https://orcid.org/0000-0002-0399-3779}{ORCID})
 }
 
 }
