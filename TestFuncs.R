@@ -213,7 +213,7 @@ gcv_uvt <- BayesLinRegDTR.model.fit(Dat.train, Dat.pred, n.train, n.pred,
 num_stages  <- 3
 t           <- 2
 p_list      <- rep(2, num_stages)
-num_treats  <- rep(2, num_stages)
+num_treats  <- c(3,2,2)
 n.train     <- 5000
 n.pred      <- 10
 numCores    <- parallel::detectCores()
