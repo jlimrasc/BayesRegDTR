@@ -2,7 +2,7 @@
 #'
 #' Generates a toy dataset simulating observed data of treatments over time with
 #' final outcomes and intermediate covariates. Follows the method outlined in
-#' \href{https://github.com/jlimrasc/BayesRegDTR/blob/main/man/Toy_Datagen.pdf}{Toy-Datagen on Github}
+#' \href{https://github.com/jlimrasc/BayesRegDTR/blob/main/inst/doc/Toy_Datagen.pdf}{Toy-Datagen on Github}
 #'
 #' @param n             Number of samples/individuals to generate
 #' @param num_stages    Total number of stages per individual
