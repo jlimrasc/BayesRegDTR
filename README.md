@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # BayesRegDTR
 
 Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based 
