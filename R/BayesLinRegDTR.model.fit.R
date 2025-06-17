@@ -142,9 +142,12 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     current_plan <- future::plan()
     doParName <- foreach::getDoParName()
     # Check if the current plan is sequential (no parallelism)
-    if (!is.null(doParName) && doParName == "doFuture" && inherits(current_plan, "sequential")) {
+    if (is.null(doParName) || doParName == "doFuture" && inherits(current_plan, "sequential")) {
+        oldWarn <- options(warn = 1)
+        on.exit(options(oldWarn))
         warning(paste("No parallel backend detected: future plan is 'sequential'. ",
                 "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
+        options(oldWarn)
     }
 
     # Check progress bar
