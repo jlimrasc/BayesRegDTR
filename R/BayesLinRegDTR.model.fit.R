@@ -158,7 +158,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
 
 
     # Retrieve training data and train model
-    if (reporting) print("=== Computing MC Draws ===")
+    if (reporting) message("=== Computing MC Draws ===")
     if (any(p_list > 1)) {
         res_mc <- compute_MC_draws_mvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
                                         nu0 = nu0, V0 = V0, alph = alph, gam = gam, p_list = p_list,
@@ -170,7 +170,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
                                        alph = alph, gam = gam, p_list = p_list, showBar = showBar)
         res_mc_f <- list("thetat_B_list" = res_mc$thetat_B_list, "sigmat_2B_list" = res_mc$sigmat_2B_list) # Formatted copy without extra data
     }
-    if (reporting) print("=== MC Draws Completed ===")
+    if (reporting) message("=== MC Draws Completed ===")
 
 
     # Inner loop
@@ -213,7 +213,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     }
 
     # Calculate all GCVs
-    if (reporting) print("=== Predicting Data ===")
+    if (reporting) message("=== Predicting Data ===")
     ntreats_t <- num_treats[t]
     i <- NULL # Stop complaining CRAN!
     progressr::with_progress({
@@ -238,11 +238,11 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     })
 
 
-    if (reporting) print("=== Prediction Completed ===")
+    if (reporting) message("=== Prediction Completed ===")
 
     # Calculate frequencies
-    if (reporting) print("=== Computing Frequencies ===")
-    progressr::with_progress({
+    if (reporting) message("=== Computing Frequencies ===")
+    progressr::with_progress({cat
         p <- progressr::progressor(steps = floor(n.train/10), enable = showBar,
                                    message = "Computing Frequencies") # Create bar
         freqs <- foreach::foreach (i = 1:n.train, .combine = rbind) %dopar% {
@@ -253,7 +253,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
         post.prob <- unname(freqs)/B
     })
 
-    if (reporting) print("=== Frequencies Completed ===")
+    if (reporting) message("=== Frequencies Completed ===")
 
 
     return(list("GCV_results" = res_GCV, "post.prob" = post.prob, "MC_draws.train" = res_mc))
