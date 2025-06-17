@@ -151,7 +151,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     }
 
     # Check progress bar
-    if (showBar && any(vapply(progressr::handlers(), identical, logical(1), progressr::handler_txtprogressbar())))
+    if (showBar && any(vapply(progressr::handlers(), identical, logical(1), progressr::handler_txtprogressbar)))
         reporting <- TRUE
     else
         reporting <- FALSE
