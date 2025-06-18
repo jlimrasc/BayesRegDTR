@@ -6,7 +6,7 @@
 \alias{BayesRegDTR-package}
 \title{BayesRegDTR: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based Regression Method}
 \description{
-Methods to estimate optimal dynamic treatment regimes using Bayesian likelihood-based regression approach as described in Yu, W., & Bondell, H. D. (2023). Uses backward induction and dynamic programming theory for computing expected values. Offers options for future parallel computing.
+Methods to estimate optimal dynamic treatment regimes using Bayesian likelihood-based regression approach as described in Yu, W., & Bondell, H. D. (2023) \doi{10.1093/jrsssb/qkad016} Uses backward induction and dynamic programming theory for computing expected values. Offers options for future parallel computing.
 }
 \references{
 References: Yu, W., & Bondell, H. D. (2023), “Bayesian Likelihood-Based Regression
