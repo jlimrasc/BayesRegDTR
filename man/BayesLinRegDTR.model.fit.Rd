@@ -97,7 +97,7 @@ the parallel sections, future must be used.
 }
 \examples{
 # Code does not run within 10 seconds, so don't run
-\dontrun{
+\donttest{
 # -----------------------------
 # Set Up Parallelism & Progress Bar
 # -----------------------------
