@@ -50,23 +50,4 @@ Monte Carlo draws??? A list containing:  \enumerate{
 \description{
 Obtain Monte Carlo draws from posterior distribution of stagewise regression parameters
 }
-\examples{
-\dontrun{
-# -----------------------------
-# Initialise Inputs
-# -----------------------------
-n           <- 5000
-num_stages  <- 3
-p_list      <- rep(2, num_stages)
-num_treats  <- rep(3, num_stages)
-Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
-
-# -----------------------------
-# Main
-# -----------------------------
-res_mvt <- compute_MC_draws_mvt(Data = Data, tau = 0.01, num_treats = 3,
-                                B = 100, nu0 = 3, V0 = diag(2), alph = 3,
-                                gam = 4, p_list = 2)
-}
-}
 \keyword{internal}

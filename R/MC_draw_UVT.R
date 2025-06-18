@@ -20,24 +20,6 @@
 #'              \item sigmay_2B: Desc. A list of length B
 #'              }
 #' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' # -----------------------------
-#' # Initialise Inputs
-#' # -----------------------------
-#' n           <- 500
-#' num_stages  <- 5
-#' num_treats     <- rep(3, num_stages)
-#' Data <- generate_dataset_uvt(n, num_stages, num_treats)
-#'
-#' # -----------------------------
-#' # Main
-#' # -----------------------------
-#' res_uvt <- compute_MC_draws_uvt(Data = Data, tau = 0.01, num_treats = 1,
-#'                                 B = 10000, alph = 3, gam = 4,
-#'                                 p_list = rep(1, num_stages))
-#' }
 compute_MC_draws_uvt <- function(Data, tau, num_treats, B, alph, gam, p_list, showBar = TRUE) {
     draw_thetat_B <- function(ct, mt, omegat_inv, B, alph, gam, n) {
         t(mvtnorm::rmvt(B, sigma = (ct + 2*gam) / (n + 2 * alph) * omegat_inv,

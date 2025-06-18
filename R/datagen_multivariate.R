@@ -9,22 +9,6 @@
 #' vector of the final outcomes, X is a list of matrices of the intermediate
 #' covariates and A is a matrix of the assigned treatments
 #' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' # -----------------------------
-#' # Initialise Inputs
-#' # -----------------------------
-#' n           <- 5000
-#' num_stages  <- 3
-#' p_list      <- rep(2, num_stages)
-#' num_treats  <- rep(3, num_stages)
-#'
-#' # -----------------------------
-#' # Main
-#' # -----------------------------
-#' Data        <- generate_dataset_mvt(n, num_stages, p_list, num_treats)
-#' }
 generate_dataset_mvt <- function(n, num_stages, p_list, num_treats) {
 
     stopifnot("num_treats length must equal num_stages" = length(force(num_treats)) == num_stages)

@@ -21,19 +21,4 @@ covariates and A is a matrix of the assigned treatments
 \description{
 Generate Univariate Dataset
 }
-\examples{
-\dontrun{
-# -----------------------------
-# Initialise Inputs
-# -----------------------------
-n           <- 500
-num_stages  <- 5
-num_treats  <- rep(3, num_stages)
-
-# -----------------------------
-# Main
-# -----------------------------
-Data <- generate_dataset_uvt(n, num_stages, num_treats)
-}
-}
 \keyword{internal}
