@@ -1,6 +1,6 @@
 Package: BayesRegDTR
 Type: Package
-Title: Optimal Dynamic Treatment Regime Inference using Bayesian Likelihood-Based Regression Method
+Title: Bayesian Regression for Dynamic Treatment Regimes
 Version: 1.0.0
 Authors@R: c(
     person(
