@@ -7,11 +7,14 @@
 #'
 #' Utilises a \link[future]{future} framework, so to enable
 #' parallel processing and register a parallel backend, \link[future]{plan} and
-#' \link[doFuture]{registerDoFuture} must be called first. Additionally,
-#' progress bars use \link[progressr]{progressr} API, and a non-default progress
-#' bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoFuture} and
-#' \link[progressr]{handlers} for examples. Note that to have a progress bar for
-#' the parallel sections, future must be used.
+#' \link[doFuture]{registerDoFuture} must be called first.
+#'
+#' Additionally, progress bars use \link[progressr]{progressr} API, and a
+#' non-default progress bar (e.g. cli) is recommended. See below or
+#' \link[doFuture]{registerDoFuture} and \link[progressr]{handlers} for examples.
+#'
+#' Note that to have a progress bar for the parallel sections, future must be used.
+#' To turn off the immediate warnings, use \code{options(BRDTR_warn_imm = FALSE)}.
 #'
 #'
 #' @param Dat.train     Training data in format returned by `generate_dataset`:
@@ -142,12 +145,17 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     current_plan <- future::plan()
     doParName <- foreach::getDoParName()
     # Check if the current plan is sequential (no parallelism)
-    if (is.null(doParName) || doParName == "doFuture" && inherits(current_plan, "sequential")) {
-        oldWarn <- options(warn = 1)
-        on.exit(options(oldWarn))
-        warning(paste("No parallel backend detected: future plan is 'sequential'. ",
-                "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
-        options(oldWarn)
+    if (is.null(doParName) || (doParName == "doFuture" && inherits(current_plan, "sequential"))) {
+        if (getOption("BRDTR_warn_imm", default = TRUE)) {
+            oldWarn <- options(warn = 1)
+            on.exit(options(oldWarn))
+            warning(paste("No parallel backend detected: future plan is 'sequential'. ",
+                    "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
+            options(oldWarn)
+        }
+        else
+            warning(paste("No parallel backend detected: future plan is 'sequential'. ",
+                    "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
     }
 
     # Check progress bar
