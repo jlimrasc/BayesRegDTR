@@ -1,3 +1,5 @@
+# BayesRegDTR 1.0.1
+
 # BayesRegDTR 1.0.0
 
 -   Initial CRAN submission.
