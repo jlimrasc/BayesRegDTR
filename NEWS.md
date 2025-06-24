@@ -1,5 +1,11 @@
 # BayesRegDTR 1.0.1
 
+-   Remove references to internal functions in examples
+-   Change dontrun in examples to donttest
+-   Shorten package title
+-   Add warning suppression into tests
+-   Add option to turn off instant warnings
+
 # BayesRegDTR 1.0.0
 
 -   Initial CRAN submission.
