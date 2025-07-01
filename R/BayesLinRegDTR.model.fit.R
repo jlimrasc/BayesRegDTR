@@ -241,7 +241,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
                 inner_b_GCV_UVT(i, ntreats_t, p_list)
             }
         p()
-        res_GCV <- array(unlist(res_GCV), dim = c(B, ntreats_t, n.train)) # Reformat into array
+        res_GCV <- array(unlist(res_GCV), dim = c(B, ntreats_t, n.pred)) # Reformat into array
 
     })
 
@@ -250,10 +250,10 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
 
     # Calculate frequencies
     if (reporting) message("=== Computing Frequencies ===")
-    progressr::with_progress({cat
-        p <- progressr::progressor(steps = floor(n.train/10), enable = showBar,
+    progressr::with_progress({
+        p <- progressr::progressor(steps = floor(n.pred/10), enable = showBar,
                                    message = "Computing Frequencies") # Create bar
-        freqs <- foreach::foreach (i = 1:n.train, .combine = rbind) %dopar% {
+        freqs <- foreach::foreach (i = 1:n.pred, .combine = rbind) %dopar% {
                  if (i%%10 == 0) p()
                  temp <- apply(res_GCV[,,i], 1, which.max)
                  tabulate(temp, nbins = ntreats_t)
