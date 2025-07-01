@@ -1,7 +1,7 @@
 Package: BayesRegDTR
 Type: Package
 Title: Bayesian Regression for Dynamic Treatment Regimes
-Version: 1.0.1
+Version: 1.1.0
 Authors@R: c(
     person(
       "Jeremy", "Lim",

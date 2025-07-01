@@ -1,3 +1,9 @@
+# BayesRegDTR 1.1.0
+
+-   Change code to prevent duplicating the data in post.pred
+-   Remove rogue cat from code. What was it doing there?
+-   Run functions quietly during tests
+
 # BayesRegDTR 1.0.1
 
 -   Remove references to internal functions in examples
