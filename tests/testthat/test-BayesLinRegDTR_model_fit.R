@@ -11,7 +11,7 @@ test_that("Error enforced", {
                                  p_list, t = 10, R = 30,
                                  tau = 0.01, B = 500, nu0 = 3,
                                  V0 = mapply(diag, p_list, SIMPLIFY = FALSE),
-                                 alph = 3, gam = 4),
+                                 alph = 3, gam = 4, showBar = FALSE),
         "t must be less than or equal to num_stages")
 
 
@@ -25,7 +25,7 @@ test_that("Error enforced", {
                                                   p_list, t = 2, R = 30,
                                                   tau = 0.01, B = 500, nu0 = 3,
                                                   V0 = 2,
-                                                  alph = 3, gam = 4),
+                                                  alph = 3, gam = 4, showBar = FALSE),
                 "No parallel backend detected: future plan is 'sequential'. For better performance, consider setting a parallel plan, e.g., plan(multisession)."),
             "Length of num_treats, V0 and p_list must be equal and of length 1 or num_stages"))
     options(BRDTR_warn_imm = NULL)
