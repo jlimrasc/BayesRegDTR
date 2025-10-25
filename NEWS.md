@@ -1,3 +1,7 @@
+# BayesRegDTR 1.1.1
+
+-   Update RoxygenNote
+
 # BayesRegDTR 1.1.0
 
 -   Change code to prevent duplicating the data in post.pred
