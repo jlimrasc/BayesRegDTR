@@ -1,3 +1,7 @@
+# BayesRegDTR 1.1.2
+
+-   Changed maintainer
+
 # BayesRegDTR 1.1.1
 
 -   Update RoxygenNote
