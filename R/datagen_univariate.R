@@ -8,21 +8,6 @@
 #' vector of the final outcomes, X is a list of matrices of the intermediate
 #' covariates and A is a matrix of the assigned treatments
 #' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' # -----------------------------
-#' # Initialise Inputs
-#' # -----------------------------
-#' n           <- 500
-#' num_stages  <- 5
-#' num_treats  <- rep(3, num_stages)
-#'
-#' # -----------------------------
-#' # Main
-#' # -----------------------------
-#' Data <- generate_dataset_uvt(n, num_stages, num_treats)
-#' }
 generate_dataset_uvt <- function(n, num_stages, num_treats) {
 
     stopifnot("num_treats length must equal num_stages" = length(force(num_treats)) == num_stages)

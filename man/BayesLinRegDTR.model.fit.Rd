@@ -89,15 +89,18 @@ expected values.
 \details{
 Utilises a \link[future]{future} framework, so to enable
 parallel processing and register a parallel backend, \link[future]{plan} and
-\link[doFuture]{registerDoFuture} must be called first. Additionally,
-progress bars use \link[progressr]{progressr} API, and a non-default progress
-bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoFuture} and
-\link[progressr]{handlers} for examples. Note that to have a progress bar for
-the parallel sections, future must be used.
+\link[doFuture]{registerDoFuture} must be called first.
+
+Additionally, progress bars use \link[progressr]{progressr} API, and a
+non-default progress bar (e.g. cli) is recommended. See below or
+\link[doFuture]{registerDoFuture} and \link[progressr]{handlers} for examples.
+
+Note that to have a progress bar for the parallel sections, future must be used.
+To turn off the immediate warnings, use \code{options(BRDTR_warn_imm = FALSE)}.
 }
 \examples{
 # Code does not run within 10 seconds, so don't run
-\dontrun{
+\donttest{
 # -----------------------------
 # Set Up Parallelism & Progress Bar
 # -----------------------------
@@ -151,8 +154,8 @@ n.pred      <- 10
 # -----------------------------
 # Generate Dataset
 # -----------------------------
-Dat.train <- generate_dataset_mvt(n.train, num_stages, p_list, num_treats)
-Dat.pred  <- generate_dataset_mvt(n.pred,  num_stages, p_list, num_treats)
+Dat.train <- generate_dataset(n.train, num_stages, p_list, num_treats)
+Dat.pred  <- generate_dataset(n.pred,  num_stages, p_list, num_treats)
 Dat.pred  <- Dat.pred[-1]
 Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
 

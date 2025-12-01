@@ -123,8 +123,8 @@ n.pred      <- 10
 # -----------------------------
 # Generate Dataset
 # -----------------------------
-Dat.train <- generate_dataset_mvt(n.train, num_stages, p_list, num_treats)
-Dat.pred  <- generate_dataset_mvt(n.pred,  num_stages, p_list, num_treats)
+Dat.train <- generate_dataset(n.train, num_stages, p_list, num_treats)
+Dat.pred  <- generate_dataset(n.pred,  num_stages, p_list, num_treats)
 Dat.pred  <- Dat.pred[-1]
 Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
 

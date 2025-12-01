@@ -7,11 +7,14 @@
 #'
 #' Utilises a \link[future]{future} framework, so to enable
 #' parallel processing and register a parallel backend, \link[future]{plan} and
-#' \link[doFuture]{registerDoFuture} must be called first. Additionally,
-#' progress bars use \link[progressr]{progressr} API, and a non-default progress
-#' bar (e.g. cli) is recommended. See below or \link[doFuture]{registerDoFuture} and
-#' \link[progressr]{handlers} for examples. Note that to have a progress bar for
-#' the parallel sections, future must be used.
+#' \link[doFuture]{registerDoFuture} must be called first.
+#'
+#' Additionally, progress bars use \link[progressr]{progressr} API, and a
+#' non-default progress bar (e.g. cli) is recommended. See below or
+#' \link[doFuture]{registerDoFuture} and \link[progressr]{handlers} for examples.
+#'
+#' Note that to have a progress bar for the parallel sections, future must be used.
+#' To turn off the immediate warnings, use \code{options(BRDTR_warn_imm = FALSE)}.
 #'
 #'
 #' @param Dat.train     Training data in format returned by `generate_dataset`:
@@ -58,7 +61,7 @@
 #'
 #' @examples
 #' # Code does not run within 10 seconds, so don't run
-#' \dontrun{
+#' \donttest{
 #' # -----------------------------
 #' # Set Up Parallelism & Progress Bar
 #' # -----------------------------
@@ -112,8 +115,8 @@
 #' # -----------------------------
 #' # Generate Dataset
 #' # -----------------------------
-#' Dat.train <- generate_dataset_mvt(n.train, num_stages, p_list, num_treats)
-#' Dat.pred  <- generate_dataset_mvt(n.pred,  num_stages, p_list, num_treats)
+#' Dat.train <- generate_dataset(n.train, num_stages, p_list, num_treats)
+#' Dat.pred  <- generate_dataset(n.pred,  num_stages, p_list, num_treats)
 #' Dat.pred  <- Dat.pred[-1]
 #' Dat.pred[[num_stages+1]]  <- Dat.pred[[num_stages+1]][1:n.pred, 1:(t-1), drop = FALSE]
 #'
@@ -142,20 +145,28 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     current_plan <- future::plan()
     doParName <- foreach::getDoParName()
     # Check if the current plan is sequential (no parallelism)
-    if (!is.null(doParName) && doParName == "doFuture" && inherits(current_plan, "sequential")) {
-        warning(paste("No parallel backend detected: future plan is 'sequential'. ",
-                "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
+    if (is.null(doParName) || (doParName == "doFuture" && inherits(current_plan, "sequential"))) {
+        if (getOption("BRDTR_warn_imm", default = TRUE)) {
+            oldWarn <- options(warn = 1)
+            on.exit(options(oldWarn))
+            warning(paste("No parallel backend detected: future plan is 'sequential'. ",
+                    "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
+            options(oldWarn)
+        }
+        else
+            warning(paste("No parallel backend detected: future plan is 'sequential'. ",
+                    "For better performance, consider setting a parallel plan, e.g., plan(multisession)."))
     }
 
     # Check progress bar
-    if (showBar && any(vapply(progressr::handlers(), identical, logical(1), progressr::handler_txtprogressbar())))
+    if (showBar && any(vapply(progressr::handlers(), identical, logical(1), progressr::handler_txtprogressbar)))
         reporting <- TRUE
     else
         reporting <- FALSE
 
 
     # Retrieve training data and train model
-    if (reporting) print("=== Computing MC Draws ===")
+    if (reporting) message("=== Computing MC Draws ===")
     if (any(p_list > 1)) {
         res_mc <- compute_MC_draws_mvt(Data = Dat.train, tau = tau, num_treats = num_treats, B = B,
                                         nu0 = nu0, V0 = V0, alph = alph, gam = gam, p_list = p_list,
@@ -167,7 +178,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
                                        alph = alph, gam = gam, p_list = p_list, showBar = showBar)
         res_mc_f <- list("thetat_B_list" = res_mc$thetat_B_list, "sigmat_2B_list" = res_mc$sigmat_2B_list) # Formatted copy without extra data
     }
-    if (reporting) print("=== MC Draws Completed ===")
+    if (reporting) message("=== MC Draws Completed ===")
 
 
     # Inner loop
@@ -210,7 +221,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
     }
 
     # Calculate all GCVs
-    if (reporting) print("=== Predicting Data ===")
+    if (reporting) message("=== Predicting Data ===")
     ntreats_t <- num_treats[t]
     i <- NULL # Stop complaining CRAN!
     progressr::with_progress({
@@ -230,19 +241,19 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
                 inner_b_GCV_UVT(i, ntreats_t, p_list)
             }
         p()
-        res_GCV <- array(unlist(res_GCV), dim = c(B, ntreats_t, n.train)) # Reformat into array
+        res_GCV <- array(unlist(res_GCV), dim = c(B, ntreats_t, n.pred)) # Reformat into array
 
     })
 
 
-    if (reporting) print("=== Prediction Completed ===")
+    if (reporting) message("=== Prediction Completed ===")
 
     # Calculate frequencies
-    if (reporting) print("=== Computing Frequencies ===")
+    if (reporting) message("=== Computing Frequencies ===")
     progressr::with_progress({
-        p <- progressr::progressor(steps = floor(n.train/10), enable = showBar,
+        p <- progressr::progressor(steps = floor(n.pred/10), enable = showBar,
                                    message = "Computing Frequencies") # Create bar
-        freqs <- foreach::foreach (i = 1:n.train, .combine = rbind) %dopar% {
+        freqs <- foreach::foreach (i = 1:n.pred, .combine = rbind) %dopar% {
                  if (i%%10 == 0) p()
                  temp <- apply(res_GCV[,,i], 1, which.max)
                  tabulate(temp, nbins = ntreats_t)
@@ -250,7 +261,7 @@ BayesLinRegDTR.model.fit <- function(Dat.train, Dat.pred, n.train, n.pred,
         post.prob <- unname(freqs)/B
     })
 
-    if (reporting) print("=== Frequencies Completed ===")
+    if (reporting) message("=== Frequencies Completed ===")
 
 
     return(list("GCV_results" = res_GCV, "post.prob" = post.prob, "MC_draws.train" = res_mc))
